@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qualifieddc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:dc="http://purl.org/dc/elements/1.1/"
+             xmlns:dcterms="http://purl.org/dc/terms/"
+             xsi:schemaLocation="http://dublincore.org/documents/dcmi-xml/ http://dublincore.org/schemas/xmls/qdc/2008/02/11/dcterms.xsd">
+  
+  <!-- 1. Title -->
+  <dc:title>Study of ML models for Racing LLM Appliances</dc:title>
+  
+  <!-- 2. Creator / Author -->
+  <dc:creator>Zalki, Manohar</dc:creator>
+  
+  <!-- 3. Subject / Keywords -->
+  <dc:subject>Formula 1</dc:subject>
+  <dc:subject>DataOps</dc:subject>
+  <dc:subject>Landing Layer</dc:subject>
+  <dc:subject>Machine Learning</dc:subject>
+  <dc:subject>LLM Appliances</dc:subject>
+  
+  <!-- 4. Description / Abstract -->
+  <dc:description>
+    Raw landing data containing historical Formula 1 circuits, constructors, drivers, race results (1950–2025), clean and raw sprint race files (2021–2025), and batch completion flags used for training and evaluating Racing LLM Appliances and DataOps pipelines.
+  </dc:description>
+  
+  <!-- 5. Publisher -->
+  <dc:publisher>Zenodo</dc:publisher>
+  
+  <!-- 6. Date -->
+  <dc:date>2026-10-16</dc:date>
+  
+  <!-- 7. Type -->
+  <dc:type>Dataset</dc:type>
+  
+  <!-- 8. Format -->
+  <dc:format>application/zip</dc:format>
+  <dc:format>application/json</dc:format>
+  <dc:format>text/csv</dc:format>
+  
+  <!-- 9. Persistent Identifier (DOI) -->
+  <dc:identifier xsi:type="dcterms:URI">https://doi.org/10.5281/zenodo.23416916</dc:identifier>
+  
+  <!-- 10. Language -->
+  <dc:language>en</dc:language>
+  
+  <!-- 11. Rights / License -->
+  <dc:rights>Creative Commons Attribution 4.0 International (CC-BY-4.0)</dc:rights>
+  <dcterms:accessRights>open</dcterms:accessRights>
+  
+</qualifieddc>

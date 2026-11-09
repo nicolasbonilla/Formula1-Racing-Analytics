@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns="http://datacite.org/schema/kernel-4"
+          xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.4/metadata.xsd">
+  
+  <!-- 1. Persistent Identifier -->
+  <identifier identifierType="DOI">10.5281/zenodo.23416916</identifier>
+  
+  <!-- 2. Creator -->
+  <creators>
+    <creator>
+      <creatorName nameType="Personal">Zalki, Manohar</creatorName>
+      <givenName>Manohar</givenName>
+      <familyName>Zalki</familyName>
+    </creator>
+  </creators>
+  
+  <!-- 3. Title -->
+  <titles>
+    <title xml:lang="en">Study of ML models for Racing LLM Appliances</title>
+  </titles>
+  
+  <!-- 4. Publisher -->
+  <publisher xml:lang="en">Zenodo</publisher>
+  
+  <!-- 5. Publication Year -->
+  <publicationYear>2026</publicationYear>
+  
+  <!-- 6. Keywords -->
+  <subjects>
+    <subject xml:lang="en">Formula 1</subject>
+    <subject xml:lang="en">DataOps</subject>
+    <subject xml:lang="en">Bronze Landing Layer</subject>
+    <subject xml:lang="en">Machine Learning</subject>
+    <subject xml:lang="en">LLM Appliances</subject>
+  </subjects>
+  
+  <!-- 7. Resource Type -->
+  <resourceType resourceTypeGeneral="Dataset">Raw Lakehouse Ingestion Layer</resourceType>
+  
+  <!-- 8. Rights / Licensing -->
+  <rightsList>
+    <rights rightsURI="https://creativecommons.org/licenses/by/4.0/legalcode" 
+            rightsIdentifier="CC-BY-4.0" 
+            rightsIdentifierScheme="SPDX">Creative Commons Attribution 4.0 International</rights>
+  </rightsList>
+  
+  <!-- 9. Abstract describing landing folder layout -->
+  <descriptions>
+    <description descriptionType="Abstract" xml:lang="en">
+      Raw landing dataset containing historical Formula 1 circuits, constructors, drivers, race results (1950–2025), clean and raw sprint race files (2021–2025), and batch completion flags (events/batch_complete_*.flag) used for training and evaluating Racing LLM Appliances and DataOps pipelines.
+    </description>
+  </descriptions>
+  
+  <!-- 10. File Formats -->
+  <formats>
+    <format>application/json</format>
+    <format>text/csv</format>
+  </formats>
+  <version>1.0.0</version>
+  
+</resource>
