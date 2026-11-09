@@ -113,7 +113,9 @@ REFERENCE_DESCRIPTIONS = {
 }
 
 DATACITE_XSD_URL = "https://schema.datacite.org/meta/kernel-4.5/metadata.xsd"
-XSD_CACHE = config.REFERENCE_DIR / "datacite_kernel_4.5_xsd"
+XSD_CACHE = config.REFERENCE_DIR / "xsd"
+# Short folder per host keeps every cached path well under the 260-character Windows limit.
+XSD_HOSTS = {"schema.datacite.org": "datacite", "www.w3.org": "w3"}
 DATACITE_NS = "http://datacite.org/schema/kernel-4"
 XSI_NS = "http://www.w3.org/2001/XMLSchema-instance"
 
@@ -338,20 +340,19 @@ def _fetch_xsd(url: str, cache_root: Path, seen: dict[str, Path]) -> Path:
     if url in seen:
         return seen[url]
     parsed = urllib.parse.urlparse(url)
-    local = cache_root / parsed.netloc / parsed.path.lstrip("/")
+    local = cache_root / XSD_HOSTS.get(parsed.netloc, parsed.netloc) / parsed.path.lstrip("/")
     seen[url] = local
-    if not local.exists():
-        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        with urllib.request.urlopen(request, timeout=60) as response:
-            content = response.read().decode("utf-8")
-        local.parent.mkdir(parents=True, exist_ok=True)
-        local.write_text(content, encoding="utf-8")
-    content = local.read_text(encoding="utf-8")
+    if local.exists():  # cached copies already point at their local includes: no network needed
+        return local
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        content = response.read().decode("utf-8")
     for loc in set(re.findall(r'schemaLocation="([^"]+)"', content)):
         target_url = urllib.parse.urljoin(url, loc)
         target = _fetch_xsd(target_url, cache_root, seen)
         rel = posixpath.relpath(target.as_posix(), local.parent.as_posix())
         content = content.replace(f'schemaLocation="{loc}"', f'schemaLocation="{rel}"')
+    local.parent.mkdir(parents=True, exist_ok=True)
     local.write_text(content, encoding="utf-8")
     return local
 
@@ -366,7 +367,7 @@ def validate_datacite_xml(xml_path: Path) -> tuple[bool, str]:
     except OSError as exc:
         if not XSD_CACHE.exists():
             return False, f"XSD could not be downloaded ({exc}) - validation skipped"
-        xsd_path = XSD_CACHE / "schema.datacite.org" / "meta" / "kernel-4.5" / "metadata.xsd"
+        xsd_path = XSD_CACHE / "datacite" / "meta" / "kernel-4.5" / "metadata.xsd"
     schema = etree.XMLSchema(etree.parse(str(xsd_path)))
     doc = etree.parse(str(xml_path))
     ok = schema.validate(doc)
