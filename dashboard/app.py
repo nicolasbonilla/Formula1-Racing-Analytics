@@ -1,7 +1,8 @@
+
 import streamlit as st
 from theme import set_theme
 from utils import load_table
-
+import pandas as pd
 # Section imports
 from sections.executive_summary import render_executive_summary
 from sections.rq1_driver_constructor import render_rq1
@@ -9,6 +10,8 @@ from sections.rq2_race_outcomes import render_rq2
 from sections.rq3_circuit_geography import render_rq3
 from sections.rq4_sprint_race import render_rq4
 from sections.rq5_cross_dataset import render_rq5
+
+from sections import rq6_graphic_llm_rag
 
 # ---------------------------------------------------------
 # 1. PAGE CONFIG + THEME
@@ -72,17 +75,11 @@ final_min, final_max = st.sidebar.slider("Final Position", 1, 20, (1, 20))
 points_min, points_max = st.sidebar.slider("Points", 0, 30, (0, 30))
 
 # ---------------------------------------------------------
-# 4. APPLY FILTERS (REMOVED CIRCUIT/DRIVER/CONSTRUCTOR/STATUS)
+# 4. APPLY FILTERS
 # ---------------------------------------------------------
 filtered_results = results.copy()
 
-# Season filter
-if len(seasons) > 0:
-    filtered_results = filtered_results[
-        filtered_results["season"].isin(seasons)
-    ]
-
-# Numeric filters
+# Apply numeric position and points sliders directly on results
 filtered_results = filtered_results[
     (filtered_results["grid_position"].between(grid_min, grid_max)) &
     (filtered_results["final_position"].between(final_min, final_max)) &
@@ -100,7 +97,8 @@ page = st.sidebar.radio(
         "RQ2 — Race Outcome Analytics",
         "RQ3 — Circuit Geography",
         "RQ4 — Sprint Race Analysis",
-        "RQ5 — Cross‑Dataset Insights"
+        "RQ5 — Cross‑Dataset Insights",
+        "RQ6: Graphic-LLM-RAG & ML Engine"
     ]
 )
 
@@ -122,7 +120,31 @@ elif page == "RQ2 — Race Outcome Analytics":
     render_rq2(filtered_data)
 
 elif page == "RQ3 — Circuit Geography":
-    render_rq3(filtered_data)
+    try:
+        res_df = filtered_data["results"]
+        races_df = data["races"]
+        circuits_df = data["circuits"]
+        
+        # Merge results with races to attach 'season' and 'circuit_id'
+        rq3_df = res_df.merge(races_df, on="race_id" if "race_id" in res_df.columns else ["season", "round"], how="inner")
+        
+        # Merge with circuits to get country details
+        if "circuit_id" in rq3_df.columns and "circuit_id" in circuits_df.columns:
+            rq3_df = rq3_df.merge(circuits_df, on="circuit_id", how="left")
+            
+        # Standardize country column name
+        if "country" in rq3_df.columns and "circuit_country" not in rq3_df.columns:
+            rq3_df["circuit_country"] = rq3_df["country"]
+        elif "location_country" in rq3_df.columns and "circuit_country" not in rq3_df.columns:
+            rq3_df["circuit_country"] = rq3_df["location_country"]
+
+        # Apply season filter AFTER the merge if seasons are selected
+        if len(seasons) > 0 and "season" in rq3_df.columns:
+            rq3_df = rq3_df[rq3_df["season"].isin(seasons)]
+
+        render_rq3(rq3_df)
+    except Exception as e:
+        st.error(f"Error loading RQ3 Circuit Geography data: {e}")
 
 elif page == "RQ4 — Sprint Race Analysis":
     render_rq4(filtered_data["results"])
@@ -130,6 +152,8 @@ elif page == "RQ4 — Sprint Race Analysis":
 elif page == "RQ5 — Cross‑Dataset Insights":
     render_rq5(filtered_data)
 
+elif page == "RQ6: Graphic-LLM-RAG & ML Engine":
+    rq6_graphic_llm_rag.render()
 # ---------------------------------------------------------
 # 7. FOOTER
 # ---------------------------------------------------------

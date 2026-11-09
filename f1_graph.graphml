@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d0" for="edge" attr.name="label" attr.type="string"/>
+<graph edgedefault="directed"><node id="Driver:Max_Verstappen"/>
+<node id="Constructor:Red_Racing"/>
+<node id="Driver:Charles_Leclerc"/>
+<node id="Constructor:Ferrari"/>
+<node id="Driver:Lewis_Hamilton"/>
+<node id="Race:Monaco_GP"/>
+<edge source="Driver:Max_Verstappen" target="Constructor:Red_Racing">
+  <data key="d0">DRIVES_FOR</data>
+</edge>
+<edge source="Driver:Max_Verstappen" target="Race:Monaco_GP">
+  <data key="d0">WON_RACE</data>
+</edge>
+<edge source="Constructor:Red_Racing" target="Race:Monaco_GP">
+  <data key="d0">COMPETED_IN</data>
+</edge>
+<edge source="Driver:Charles_Leclerc" target="Constructor:Ferrari">
+  <data key="d0">DRIVES_FOR</data>
+</edge>
+<edge source="Driver:Charles_Leclerc" target="Race:Monaco_GP">
+  <data key="d0">PODIUM_FINISH</data>
+</edge>
+<edge source="Constructor:Ferrari" target="Race:Monaco_GP">
+  <data key="d0">COMPETED_IN</data>
+</edge>
+<edge source="Driver:Lewis_Hamilton" target="Constructor:Ferrari">
+  <data key="d0">DRIVES_FOR</data>
+</edge>
+<edge source="Driver:Lewis_Hamilton" target="Race:Monaco_GP">
+  <data key="d0">PARTICIPATED_IN</data>
+</edge>
+</graph></graphml>

@@ -1,4 +1,4 @@
-.
+F1-Analytics
 ├── dashboard
 │   ├── __pycache__
 │   │   ├── theme.cpython-313.pyc

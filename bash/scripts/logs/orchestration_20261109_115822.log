@@ -1,0 +1,8 @@
+====================================
+🚀 Starting Orchestration Pipeline
+====================================
+✔ WORKSPACE = bash
+✔ LOG FILE  = bash/scripts/logs/orchestration_20261109_115822.log
+
+🔍 Step 1 — Checking control table...
+/Users/manoharazalki/.pyenv/versions/3.11.6/bin/python3: can't open file '/Users/manoharazalki/F1-Analytics/bash/notebooks/06-orchestration/00_create_control_tables.py': [Errno 2] No such file or directory

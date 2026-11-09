@@ -2,119 +2,171 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
-def render_rq3(data):
-    st.title("🌍 RQ3 — Circuit Geography & Regional Performance")
-
-    # Extract tables
-    results = data["results"].copy()      # fact_session_results (already denormalized with circuit info)
-    circuits = data["circuits"].copy()    # Silver/Gold circuits table if needed
-
-    # ---------------------------------------------------------
-    # VALIDATION
-    # ---------------------------------------------------------
-    if results.empty:
-        st.error("❌ Missing fact_session_results table. Please run the full pipeline first.")
+def render_rq3(df: pd.DataFrame):
+    """
+    RQ3 - Circuit Geography & Regional Performance section.
+    """
+    st.header("🌎 RQ3 — Circuit Geography & Regional Performance")
+    
+    if df.empty:
+        st.warning("⚠️ No data available matching the current filter criteria.")
         return
 
-    df = results.copy()
+    # Debug helper or column resolver
+    # Standardize column names dynamically based on what's available in the merged df
+    country_col = next((c for c in ["circuit_country", "country", "location", "locality"] if c in df.columns), None)
+    circuit_col = next((c for c in ["circuit_name", "name", "circuitRef"] if c in df.columns), None)
+    driver_col = next((c for c in ["driver_name", "surname", "driverRef", "family_name"] if c in df.columns), None)
+    
+    # Fallback column mapping if standard Ergast/Gold names are split
+    if not country_col and "location" in df.columns:
+        country_col = "location"
+    if not country_col:
+        # Create a dummy country column if missing to prevent crashes
+        df["circuit_country"] = "Unknown"
+        country_col = "circuit_country"
 
-    # Ensure circuit_id and circuit_name exist
-    if "circuit_id" not in df.columns:
-        st.error("❌ 'circuit_id' column is missing from fact table. Check Gold build script.")
-        return
+    if not circuit_col:
+        df["circuit_name"] = "Unknown Circuit"
+        circuit_col = "circuit_name"
 
-    # Fallback or normalize country column name
-    country_col = "circuit_country" if "circuit_country" in df.columns else ("country" if "country" in df.columns else None)
+    if not driver_col:
+        df["driver_name"] = "Driver"
+        driver_col = "driver_name"
 
     # ---------------------------------------------------------
-    # 1) COUNTRY‑LEVEL GEO PERFORMANCE MAP
+    # 1. READ SIDEBAR FILTERS
+    # ---------------------------------------------------------
+    selected_seasons = st.session_state.get("selected_seasons", [])
+    grid_range = st.session_state.get("grid_range", (1, 20))
+    pos_range = st.session_state.get("pos_range", (1, 20))
+    points_range = st.session_state.get("points_range", (0, 30))
+
+    df_filtered = df.copy()
+
+    # Apply Season Filter
+    if selected_seasons and "season" in df_filtered.columns:
+        df_filtered = df_filtered[df_filtered["season"].isin(selected_seasons)]
+
+    # Apply Position/Points Filters safely
+    if "grid_position" in df_filtered.columns:
+        df_filtered = df_filtered[df_filtered["grid_position"].between(grid_range[0], grid_range[1])]
+    elif "grid" in df_filtered.columns:
+        df_filtered = df_filtered[df_filtered["grid"].between(grid_range[0], grid_range[1])]
+
+    if "final_position" in df_filtered.columns:
+        df_filtered = df_filtered[df_filtered["final_position"].between(pos_range[0], pos_range[1])]
+    elif "position" in df_filtered.columns:
+        df_filtered = df_filtered[df_filtered["position"].between(pos_range[0], pos_range[1])]
+
+    if "points" in df_filtered.columns:
+        df_filtered = df_filtered[df_filtered["points"].between(points_range[0], points_range[1])]
+
+    if df_filtered.empty:
+        st.warning("⚠️ No records match your current filter settings. Please broaden your slider or season selections.")
+        return
+
+    # ---------------------------------------------------------
+    # 2. CIRCUIT PERFORMANCE BY COUNTRY
     # ---------------------------------------------------------
     st.subheader("🗺️ Circuit Performance by Country")
 
-    if country_col:
-        country_points = (
-            df.groupby(country_col, dropna=False)["points"]
-            .sum()
-            .reset_index()
-        )
-        fig = px.choropleth(
-            country_points,
+    country_df = (
+        df_filtered.groupby(country_col, as_index=False)["points"]
+        .sum()
+        .sort_values(by="points", ascending=False)
+    )
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        fig_map = px.choropleth(
+            country_df,
             locations=country_col,
             locationmode="country names",
             color="points",
-            title="Circuit Performance — Points by Host Country",
             color_continuous_scale="Viridis",
+            title="Circuit Performance — Points by Host Country",
+            labels={country_col: "Country", "points": "Total Points"}
         )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("⚠ No country column found — cannot render geo map.")
+        fig_map.update_layout(template="plotly_dark", margin=dict(l=0, r=0, t=40, b=0))
+        st.plotly_chart(fig_map, use_container_width=True)
 
-    # ---------------------------------------------------------
-    # 2) CIRCUIT COMPETITIVENESS INDEX (CCI)
-    # ---------------------------------------------------------
-    st.subheader("🔥 Circuit Competitiveness Index (CCI)")
-
-    circuit_comp = (
-        df.groupby(["circuit_id", "circuit_name"], dropna=False)["final_position"]
-        .std()
-        .reset_index()
-        .rename(columns={"final_position": "competitiveness"})
-    )
-
-    circuit_comp["competitiveness"] = circuit_comp["competitiveness"].fillna(0)
-
-    fig2 = px.bar(
-        circuit_comp.sort_values("competitiveness"),
-        x="circuit_name",
-        y="competitiveness",
-        title="Circuit Competitiveness Index (Lower = Tighter Racing)",
-        color="competitiveness",
-        color_continuous_scale="Plasma",
-    )
-    st.plotly_chart(fig2, use_container_width=True)
-
-    # ---------------------------------------------------------
-    # 3) COUNTRY‑WISE PERFORMANCE
-    # ---------------------------------------------------------
-    st.subheader("🌎 Country‑Wise Performance")
-
-    if country_col:
-        region_perf = (
-            df.groupby(country_col, dropna=False)["points"]
-            .sum()
-            .reset_index()
-            .sort_values("points", ascending=False)
-        )
-
-        fig3 = px.bar(
-            region_perf,
+    with col2:
+        fig_country_bar = px.bar(
+            country_df.head(15),
             x=country_col,
             y="points",
-            title="Total Points Awarded by Country",
             color="points",
-            color_continuous_scale="Inferno",
+            color_continuous_scale="Plasma",
+            title="Total Points Awarded by Country (Top 15)",
+            labels={country_col: "Country", "points": "Points"}
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        fig_country_bar.update_layout(template="plotly_dark", xaxis_tickangle=-45)
+        st.plotly_chart(fig_country_bar, use_container_width=True)
+
+    st.markdown("---")
 
     # ---------------------------------------------------------
-    # 4) DRIVER–CIRCUIT AFFINITY MAP
+    # 3. CIRCUIT COMPETITIVENESS INDEX (CCI)
     # ---------------------------------------------------------
-    st.subheader("🔗 Driver–Circuit Affinity")
+    st.subheader("🔥 Circuit Competitiveness Index (CCI)")
+    st.caption("Lower CCI score indicates tighter grid performance and higher position variance.")
 
-    driver_affinity = (
-        df.groupby(["driver_name", "circuit_name"], dropna=False)["points"]
-        .sum()
-        .reset_index()
-    )
+    g_col = "grid_position" if "grid_position" in df_filtered.columns else "grid"
+    p_col = "final_position" if "final_position" in df_filtered.columns else "position"
 
-    fig4 = px.density_heatmap(
-        driver_affinity,
-        x="circuit_name",
-        y="driver_name",
-        z="points",
-        title="Driver–Circuit Affinity Heatmap",
-        color_continuous_scale="Magma",
-    )
-    st.plotly_chart(fig4, use_container_width=True)
+    if g_col in df_filtered.columns and p_col in df_filtered.columns:
+        df_filtered["pos_delta"] = (df_filtered[g_col] - df_filtered[p_col]).abs()
+        
+        cci_df = (
+            df_filtered.groupby(circuit_col, as_index=False)["pos_delta"]
+            .mean()
+            .rename(columns={"pos_delta": "competitiveness"})
+            .sort_values(by="competitiveness", ascending=True)
+        )
 
-    st.success("RQ3 analysis loaded successfully.")
+        fig_cci = px.bar(
+            cci_df.head(15),
+            x=circuit_col,
+            y="competitiveness",
+            color="competitiveness",
+            color_continuous_scale="Turbo",
+            title="Circuit Competitiveness Index (Lower = Tighter Racing)",
+            labels={circuit_col: "Circuit", "competitiveness": "CCI Score"}
+        )
+        fig_cci.update_layout(template="plotly_dark", xaxis_tickangle=-45)
+        st.plotly_chart(fig_cci, use_container_width=True)
+
+    st.markdown("---")
+
+    # ---------------------------------------------------------
+    # 4. DRIVER-CIRCUIT AFFINITY HEATMAP
+    # ---------------------------------------------------------
+    st.subheader("🏎️ Driver–Circuit Affinity Heatmap")
+
+    if driver_col in df_filtered.columns and circuit_col in df_filtered.columns:
+        top_drivers = df_filtered.groupby(driver_col)["points"].sum().nlargest(15).index
+        top_circuits = df_filtered.groupby(circuit_col)["points"].sum().nlargest(15).index
+
+        affinity_df = df_filtered[
+            df_filtered[driver_col].isin(top_drivers) & df_filtered[circuit_col].isin(top_circuits)
+        ]
+
+        if not affinity_df.empty:
+            heatmap_data = (
+                affinity_df.groupby([driver_col, circuit_col], as_index=False)["points"]
+                .sum()
+            )
+
+            fig_heatmap = px.density_heatmap(
+                heatmap_data,
+                x=circuit_col,
+                y=driver_col,
+                z="points",
+                color_continuous_scale="Magma",
+                title="Driver–Circuit Affinity (Points Scored)",
+                labels={circuit_col: "Circuit", driver_col: "Driver", "points": "Points"}
+            )
+            fig_heatmap.update_layout(template="plotly_dark", xaxis_tickangle=-45)
+            st.plotly_chart(fig_heatmap, use_container_width=True)

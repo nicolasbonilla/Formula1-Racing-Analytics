@@ -1,0 +1,48 @@
+{
+  "@context": "https://schema.org/",
+  "@type": "Dataset",
+  "name": "Study of ML models for Racing LLM Appliances",
+  "description": "Raw landing data containing historical Formula 1 circuits, constructors, drivers, race results (1950–2025), and sprint race datasets used for training and evaluating Racing LLM Appliances and DataOps pipelines.",
+  "url": "https://doi.org/10.5281/zenodo.23416916",
+  "identifier": {
+    "@type": "PropertyValue",
+    "propertyID": "DOI",
+    "value": "10.5281/zenodo.23416916"
+  },
+  "creator": {
+    "@type": "Person",
+    "name": "Manohar Zalki"
+  },
+  "datePublished": "2026-10-16",
+  "keywords": ["Formula 1", "DataOps", "Landing Layer", "LLM Appliances", "Machine Learning"],
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "application/zip",
+      "contentUrl": "https://zenodo.org/records/23416916/files/racing_f1_data.zip"
+    }
+  ],
+  "hasPart": [
+    {
+      "@type": "DigitalDocument",
+      "name": "circuits.csv",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@type": "DigitalDocument",
+      "name": "constructors.json",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@type": "DigitalDocument",
+      "name": "drivers.json",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@type": "DigitalDocument",
+      "name": "races.csv",
+      "encodingFormat": "text/csv"
+    }
+  ]
+}
