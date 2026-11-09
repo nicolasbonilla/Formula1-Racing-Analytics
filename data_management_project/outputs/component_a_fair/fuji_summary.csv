@@ -1,0 +1,4 @@
+resource,url,role,evaluated_at_utc,metric_version,software_version,fair_percent,F_percent,A_percent,I_percent,R_percent,fair_score_earned,fair_score_total
+github_repository,https://github.com/zalkimanohar/Formula1-Racing-Analytics,Where the group's raw archive racing_f1_data.zip is published,2026-11-09T20:00:13+00:00,0.5,4.0.1,31.25,35.71,33.33,25.0,30.0,7.5,24.0
+jolpica_ergast_api,http://api.jolpi.ca/ergast/f1/,API the raw data was downloaded from (Ergast-compatible endpoint),2026-11-09T20:00:18+00:00,0.5,4.0.1,8.33,14.29,33.33,0.0,0.0,2.0,24.0
+kaggle_ergast_mirror,https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020,Most-used public mirror of the Ergast database (approved source type),2026-11-09T20:00:36+00:00,0.5,4.0.1,64.58,50.0,100.0,75.0,60.0,15.5,24.0

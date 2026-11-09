@@ -1,137 +1,41 @@
+"""Formula 1 in numbers - Streamlit entry point (`streamlit run app.py`).
+
+The page itself is a self-contained web app in static/ (index.html, styles.css, app.js, data.js),
+built from the cleaned dataset by build_web_data.py. Streamlit only serves it full screen; the
+same index.html also opens directly in a browser.
+"""
+import re
+from pathlib import Path
+
 import streamlit as st
-from theme import set_theme
-from utils import load_table
+import streamlit.components.v1 as components
 
-# Section imports
-from sections.executive_summary import render_executive_summary
-from sections.rq1_driver_constructor import render_rq1
-from sections.rq2_race_outcomes import render_rq2
-from sections.rq3_circuit_geography import render_rq3
-from sections.rq4_sprint_race import render_rq4
-from sections.rq5_cross_dataset import render_rq5
+STATIC = Path(__file__).resolve().parent / "static"
 
-# ---------------------------------------------------------
-# 1. PAGE CONFIG + THEME
-# ---------------------------------------------------------
-st.set_page_config(
-    page_title="F1 Analytics Dashboard",
-    page_icon="🏎️",
-    layout="wide"
-)
+FULL_SCREEN = """
+<style>
+[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stSidebar"],
+[data-testid="stSidebarCollapsedControl"], [data-testid="stStatusWidget"], #MainMenu, footer { display: none !important; }
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background: #16181c !important; }
+[data-testid="stMainBlockContainer"], .block-container { padding: 0 !important; max-width: 100% !important; }
+iframe { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important;
+         border: 0 !important; z-index: 999; }
+</style>
+"""
 
-set_theme()
 
-# ---------------------------------------------------------
-# 2. LOAD ALL REQUIRED DATASETS (Gold + Silver)
-# ---------------------------------------------------------
-@st.cache_data
-def load_all_data():
-    return {
-        "drivers": load_table("drivers"),
-        "constructors": load_table("constructors"),
-        "races": load_table("races"),
-        "results": load_table("results"),
-        "circuits": load_table("circuits"),
-        "sprints": load_table("sprints"),
-    }
+@st.cache_resource(show_spinner=False)
+def bundled_page(version: float) -> str:
+    """index.html with its stylesheet and scripts inlined, so it can run inside one frame."""
+    html = (STATIC / "index.html").read_text(encoding="utf-8")
+    css = (STATIC / "styles.css").read_text(encoding="utf-8")
+    html = html.replace('<link rel="stylesheet" href="styles.css">', f"<style>{css}</style>")
+    return re.sub(r'<script src="([^"]+)"></script>',
+                  lambda m: f"<script>{(STATIC / m.group(1)).read_text(encoding='utf-8')}</script>", html)
 
-data = load_all_data()
 
-# [Rest of your app.py remains the same...]
-
-# ---------------------------------------------------------
-# 3. GLOBAL FILTERS (ONLY SEASON + SLIDERS)
-# ---------------------------------------------------------
-st.sidebar.title("🔍 Filters")
-
-drivers = data["drivers"]
-constructors = data["constructors"]
-races = data["races"]
-results = data["results"]
-
-# Ensure GOLD schema is correct
-if "season" not in races.columns:
-    st.error("❌ Races table missing 'season' column — check Gold layer.")
-    st.stop()
-
-# Remove 2026 from options
-season_list = sorted([s for s in races["season"].dropna().unique() if s != 2027])
-
-# Default seasons
-default_seasons = [s for s in [2024, 2025, 2026] if s in season_list]
-
-seasons = st.sidebar.multiselect(
-    "Season",
-    season_list,
-    default=default_seasons
-)
-
-# Sliders
-grid_min, grid_max = st.sidebar.slider("Grid Position", 1, 20, (1, 20))
-final_min, final_max = st.sidebar.slider("Final Position", 1, 20, (1, 20))
-points_min, points_max = st.sidebar.slider("Points", 0, 30, (0, 30))
-
-# ---------------------------------------------------------
-# 4. APPLY FILTERS (REMOVED CIRCUIT/DRIVER/CONSTRUCTOR/STATUS)
-# ---------------------------------------------------------
-filtered_results = results.copy()
-
-# Season filter
-if len(seasons) > 0:
-    filtered_results = filtered_results[
-        filtered_results["season"].isin(seasons)
-    ]
-
-# Numeric filters
-filtered_results = filtered_results[
-    (filtered_results["grid_position"].between(grid_min, grid_max)) &
-    (filtered_results["final_position"].between(final_min, final_max)) &
-    (filtered_results["points"].between(points_min, points_max))
-]
-
-# ---------------------------------------------------------
-# 5. SIDEBAR NAVIGATION
-# ---------------------------------------------------------
-page = st.sidebar.radio(
-    "Navigate",
-    [
-        "Executive Summary",
-        "RQ1 — Driver & Constructor Insights",
-        "RQ2 — Race Outcome Analytics",
-        "RQ3 — Circuit Geography",
-        "RQ4 — Sprint Race Analysis",
-        "RQ5 — Cross‑Dataset Insights"
-    ]
-)
-
-# ---------------------------------------------------------
-# 6. ROUTE TO SELECTED PAGE
-# ---------------------------------------------------------
-filtered_data = {
-    **data,
-    "results": filtered_results
-}
-
-if page == "Executive Summary":
-    render_executive_summary(filtered_data)
-
-elif page == "RQ1 — Driver & Constructor Insights":
-    render_rq1(filtered_data["results"])
-
-elif page == "RQ2 — Race Outcome Analytics":
-    render_rq2(filtered_data)
-
-elif page == "RQ3 — Circuit Geography":
-    render_rq3(filtered_data)
-
-elif page == "RQ4 — Sprint Race Analysis":
-    render_rq4(filtered_data["results"])
-
-elif page == "RQ5 — Cross‑Dataset Insights":
-    render_rq5(filtered_data)
-
-# ---------------------------------------------------------
-# 7. FOOTER
-# ---------------------------------------------------------
-st.markdown("---")
-st.markdown("### Built by SRH F1 Student Group — F1 Analytics Platform 🚀")
+st.set_page_config(page_title="Formula 1 in Numbers, 1950-2025", page_icon=":material/sports_motorsports:",
+                   layout="wide", initial_sidebar_state="collapsed")
+st.markdown(FULL_SCREEN, unsafe_allow_html=True)
+latest_change = max(p.stat().st_mtime for p in STATIC.rglob("*") if p.is_file())
+components.html(bundled_page(latest_change), height=900, scrolling=True)

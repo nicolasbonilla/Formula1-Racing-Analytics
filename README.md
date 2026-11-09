@@ -9,6 +9,41 @@ It mirrors a Databricks‑style Medallion Architecture but runs entirely on a lo
 
 ---
 
+## 🎓 Data Management coursework (SRH, Winter 2026/27)
+
+Group: **Chirag Adhikari, Manohar Zalki, Nicolas Bonilla** (joint work on every component).
+
+The graded project lives in [`data_management_project/`](data_management_project/): a reproducible
+pipeline that turns the Jolpica/Ergast archive into a quality-assessed, cleaned and FAIR-documented
+dataset of every World Championship result 1950-2025 (25,873 rows, 29 quality issues, 55 validation
+gates, 14 tests), plus a NetworkX team-mate graph and the interactive dashboard in [`dashboard/`](dashboard/).
+
+| What | Where |
+|---|---|
+| Joint report (Word and PDF) | [`data_management_project/report/`](data_management_project/report/) |
+| Presentation (PowerPoint, PDF, presenter script) | [`data_management_project/report/presentation/`](data_management_project/report/presentation/) |
+| Q&A preparation and reflection drafts | [`data_management_project/report/`](data_management_project/report/) |
+| Submission ZIP for the course portal | [`data_management_project/dist/`](data_management_project/dist/) |
+| Cleaned dataset and metadata (DataCite, schema.org, PROV-O) | [`data_management_project/data/cleaned/`](data_management_project/data/cleaned/), [`data_management_project/outputs/component_a_fair/`](data_management_project/outputs/component_a_fair/) |
+| Interactive dashboard (served zone of the pipeline) | [`dashboard/app.py`](dashboard/app.py), [`dashboard/static/`](dashboard/static/) |
+
+Reproduce everything on macOS / Linux (Python 3.11+; LibreOffice only for the PDF exports):
+
+```bash
+cd data_management_project
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python run_all.py --from-scratch && python -m pytest -q
+python -m src.build_report && python -m src.build_slides && python build_submission.py
+cd ../dashboard && streamlit run app.py        # http://localhost:8501
+```
+
+`dashboard/static/index.html` also opens directly in a browser. The earlier multi-page Streamlit
+dashboard on the Spark gold layer (RQ1-RQ6) is kept as `dashboard/app_classic.py`
+(`cd dashboard && streamlit run app_classic.py`). Full details: [`data_management_project/README.md`](data_management_project/README.md).
+
+---
+
 ## 🧱 Architecture Overview
 
 ### Medallion Layers  
@@ -99,7 +134,8 @@ bash scripts/run_pipeline.sh <batch_id>
 ---
 
 ### run_dashboard.sh  
-Starts the Streamlit dashboard.
+Starts the Streamlit dashboard (`dashboard/app.py`, the coursework dashboard). The original gold-layer
+dashboard runs with `cd dashboard && streamlit run app_classic.py`.
 
 ---
 
