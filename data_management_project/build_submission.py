@@ -69,6 +69,41 @@ def main() -> None:
     digest = hashlib.sha256(ZIP_PATH.read_bytes()).hexdigest()
     print(f"[submission] {len(files)} files -> {ZIP_PATH.relative_to(ROOT)} "
           f"({ZIP_PATH.stat().st_size / 1e6:.1f} MB, sha256 {digest[:16]}...)")
+    publish_documents()
+
+
+FINAL_DOCS = [
+    ("report/F1_Data_Management_Joint_Report.pdf", "Joint report (PDF)"),
+    ("report/F1_Data_Management_Joint_Report.docx", "Joint report (Word)"),
+    ("report/presentation/F1_Data_Management_Presentation.pdf", "Presentation (PDF)"),
+    ("report/presentation/F1_Data_Management_Presentation.pptx", "Presentation (PowerPoint)"),
+    ("report/presentation/presenter_script.md", "Presenter script, who says what"),
+    ("report/qa_preparation.md", "Q&A preparation"),
+    ("dist/F1_DataManagement_Group_Submission.zip", "Submission ZIP for the course portal"),
+]
+
+
+def publish_documents() -> None:
+    """Copy the final documents to <repo>/00_FINAL_DOCUMENTS so they are the first thing seen on GitHub."""
+    repo = ROOT.parent
+    if ROOT.name != "data_management_project" or not (repo / "dashboard").is_dir():
+        return  # running from the unzipped submission: nothing to publish
+    target = repo / "00_FINAL_DOCUMENTS"
+    (target / "reflection_drafts").mkdir(parents=True, exist_ok=True)
+    rows = []
+    for rel, label in FINAL_DOCS:
+        src = ROOT / rel
+        (target / src.name).write_bytes(src.read_bytes())
+        rows.append(f"| [{src.name}]({src.name}) | {label} |")
+    for src in sorted((config.REPORT_DIR / "reflection_drafts").glob("*.docx")):
+        (target / "reflection_drafts" / src.name).write_bytes(src.read_bytes())
+        rows.append(f"| [reflection_drafts/{src.name}](reflection_drafts/{src.name}) | Reflection draft to personalise |")
+    (target / "README.md").write_text(
+        "# Final documents - Data Management project (SRH, Winter 2026/27)\n\n"
+        f"Group: {config.TEAM_NAMES}.\n\n| File | What it is |\n|---|---|\n" + "\n".join(rows) + "\n\n"
+        "Copies of the files generated in `data_management_project/` (refreshed by `python build_submission.py`).\n"
+        "To reproduce everything, see the README at the top of the repository.\n", encoding="utf-8")
+    print(f"[submission] final documents copied to {target.name}/")
 
 
 if __name__ == "__main__":

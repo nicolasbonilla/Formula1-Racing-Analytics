@@ -1,5 +1,19 @@
+# 📄 Final documents — Data Management project (SRH, Winter 2026/27)
 
-%md
+Group: **Chirag Adhikari, Manohar Zalki, Nicolas Bonilla**. Everything is in [`00_FINAL_DOCUMENTS/`](00_FINAL_DOCUMENTS/):
+
+| Document | PDF | Editable |
+|---|---|---|
+| Joint report | [F1_Data_Management_Joint_Report.pdf](00_FINAL_DOCUMENTS/F1_Data_Management_Joint_Report.pdf) | [Word](00_FINAL_DOCUMENTS/F1_Data_Management_Joint_Report.docx) |
+| Presentation | [F1_Data_Management_Presentation.pdf](00_FINAL_DOCUMENTS/F1_Data_Management_Presentation.pdf) | [PowerPoint](00_FINAL_DOCUMENTS/F1_Data_Management_Presentation.pptx) |
+| Presenter script | [presenter_script.md](00_FINAL_DOCUMENTS/presenter_script.md) | |
+| Q&A preparation | [qa_preparation.md](00_FINAL_DOCUMENTS/qa_preparation.md) | |
+| Reflection drafts (one per member) | | [reflection_drafts/](00_FINAL_DOCUMENTS/reflection_drafts/) |
+| Submission ZIP for the course portal | | [F1_DataManagement_Group_Submission.zip](00_FINAL_DOCUMENTS/F1_DataManagement_Group_Submission.zip) |
+
+Run it on your computer: see [Data Management coursework](#-data-management-coursework-srh-winter-202627) below.
+
+---
 
 # 🏎️ F1 Race Analytics — Version 2.0  
 ### End‑to‑End Incremental Data Engineering Pipeline (Local Workspace Edition)
