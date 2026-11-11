@@ -1,12 +1,12 @@
 WARNING: Using incubator modules: jdk.incubator.vector
 Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
-26/11/11 11:56:39 WARN Utils: Your hostname, Manohars-MacBook-Air.local, resolves to a loopback address: 127.0.0.1; using 172.16.108.73 instead (on interface en0)
-26/11/11 11:56:39 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+26/11/11 12:43:04 WARN Utils: Your hostname, Manohars-MacBook-Air.local, resolves to a loopback address: 127.0.0.1; using 172.16.108.73 instead (on interface en0)
+26/11/11 12:43:04 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
 Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
-26/11/11 11:56:39 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-26/11/11 11:56:41 WARN SparkSession: Using an existing Spark session; only runtime SQL configurations will take effect.
+26/11/11 12:43:05 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+26/11/11 12:43:06 WARN SparkSession: Using an existing Spark session; only runtime SQL configurations will take effect.
 [INFO] WORKSPACE = /Users/manoharazalki/Formula1-Racing-Analytics
 [INFO] BATCH_ID  = 2026-02
 [INFO] silver_helpers WORKSPACE = /Users/manoharazalki/Formula1-Racing-Analytics
@@ -17,15 +17,15 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 +------+-----+--------------------+--------------------+----------+-----------+--------------------+--------------------+--------+
 |season|round|                 url|            raceName|      date|  circuitId|    ingest_timestamp|         source_file|batch_id|
 +------+-----+--------------------+--------------------+----------+-----------+--------------------+--------------------+--------+
-|  2026|    1|https://en.wikipe...|Australian Grand ...|2026-03-08|albert_park|2026-11-11 11:56:...|/Users/manoharaza...| 2026-02|
-|  2026|    2|https://en.wikipe...|  Chinese Grand Prix|2026-03-15|   shanghai|2026-11-11 11:56:...|/Users/manoharaza...| 2026-02|
+|  2026|    1|https://en.wikipe...|Australian Grand ...|2026-03-08|albert_park|2026-11-11 12:42:...|/Users/manoharaza...| 2026-02|
+|  2026|    2|https://en.wikipe...|  Chinese Grand Prix|2026-03-15|   shanghai|2026-11-11 12:42:...|/Users/manoharaza...| 2026-02|
 +------+-----+--------------------+--------------------+----------+-----------+--------------------+--------------------+--------+
 
 [INFO] ✔ Races Silver written: /Users/manoharazalki/Formula1-Racing-Analytics/data/silver/races/races.parquet
 +----+-----+--------------------+----------+-----------+--------------------+--------------------+--------+--------------------+--------------------+
 |year|round|           race_name| race_date| circuit_id|    ingest_timestamp|         source_file|batch_id|   created_timestamp|   updated_timestamp|
 +----+-----+--------------------+----------+-----------+--------------------+--------------------+--------+--------------------+--------------------+
-|2026|    1|Australian Grand ...|2026-03-08|albert_park|2026-11-11 11:56:...|/Users/manoharaza...| 2026-02|2026-11-11 11:56:...|2026-11-11 11:56:...|
-|2026|    2|  Chinese Grand Prix|2026-03-15|   shanghai|2026-11-11 11:56:...|/Users/manoharaza...| 2026-02|2026-11-11 11:56:...|2026-11-11 11:56:...|
+|2026|    1|Australian Grand ...|2026-03-08|albert_park|2026-11-11 12:42:...|/Users/manoharaza...| 2026-02|2026-11-11 12:43:...|2026-11-11 12:43:...|
+|2026|    2|  Chinese Grand Prix|2026-03-15|   shanghai|2026-11-11 12:42:...|/Users/manoharaza...| 2026-02|2026-11-11 12:43:...|2026-11-11 12:43:...|
 +----+-----+--------------------+----------+-----------+--------------------+--------------------+--------+--------------------+--------------------+
 
