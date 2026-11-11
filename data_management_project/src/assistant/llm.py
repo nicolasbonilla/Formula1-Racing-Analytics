@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from collections.abc import Iterator
@@ -33,15 +34,20 @@ def _has(models: list[str], wanted: str) -> bool:
     return any(m == wanted or m == base for m in models)
 
 
-def status(timeout: float = 2.0) -> dict:
-    try:
-        with _request("/api/tags", timeout=timeout) as r:
-            models = [m["name"] for m in json.loads(r.read())["models"]]
-        with _request("/api/version", timeout=timeout) as r:
-            version = json.loads(r.read()).get("version")
-    except (urllib.error.URLError, OSError, ValueError) as exc:
-        return {"online": False, "error": str(exc), "chat_model": CHAT_MODEL, "embed_model": EMBED_MODEL,
-                "chat_model_ready": False, "embed_model_ready": False}
+def status(timeout: float = 3.0, attempts: int = 2) -> dict:
+    """Is Ollama up and are the models pulled? Retried once: a busy server can miss one short request."""
+    for attempt in range(attempts):
+        try:
+            with _request("/api/tags", timeout=timeout) as r:
+                models = [m["name"] for m in json.loads(r.read())["models"]]
+            with _request("/api/version", timeout=timeout) as r:
+                version = json.loads(r.read()).get("version")
+            break
+        except (urllib.error.URLError, OSError, ValueError) as exc:
+            if attempt + 1 == attempts:
+                return {"online": False, "error": str(exc), "chat_model": CHAT_MODEL, "embed_model": EMBED_MODEL,
+                        "chat_model_ready": False, "embed_model_ready": False}
+            time.sleep(1.5)
     return {"online": True, "version": version, "models": models, "chat_model": CHAT_MODEL,
             "embed_model": EMBED_MODEL, "chat_model_ready": _has(models, CHAT_MODEL),
             "embed_model_ready": _has(models, EMBED_MODEL)}

@@ -59,7 +59,7 @@
     "@type": "Organization",
     "name": "Zenodo"
   },
-  "dateCreated": "2026-11-09",
+  "dateCreated": "2026-11-11",
   "temporalCoverage": "1950-05-13/2025-12-07",
   "spatialCoverage": {
     "@type": "Place",
@@ -800,9 +800,9 @@
     },
     {
       "@type": "Dataset",
-      "@id": "https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip",
-      "name": "racing_f1_data.zip (raw archive)",
-      "url": "https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip"
+      "@id": "https://doi.org/10.5281/zenodo.23416916",
+      "name": "racing_f1_data.zip (raw archive on Zenodo, DOI 10.5281/zenodo.23416916)",
+      "url": "https://doi.org/10.5281/zenodo.23416916"
     }
   ],
   "prov:wasDerivedFrom": [
@@ -813,7 +813,7 @@
       "@id": "http://ergast.com/mrd/"
     },
     {
-      "@id": "https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip"
+      "@id": "https://doi.org/10.5281/zenodo.23416916"
     }
   ],
   "measurementTechnique": [

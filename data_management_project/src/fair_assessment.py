@@ -6,11 +6,13 @@ maturity scale (0 not applicable, 1 not considered, 2 under consideration/planne
 3 in implementation, 4 fully implemented) for two states of the dataset:
 
 * as_obtained - racing_f1_data.zip in the public GitHub repository plus the Jolpica (Ergast) API.
+                The group later deposited the same archive on Zenodo (DOI 10.5281/zenodo.23416916, byte-identical);
+                that deposit is evaluated with F-UJI and cited as the source of the curated package.
 * curated     - the package delivered by the group: cleaned CSVs, DataCite/schema.org/Data Package
                 metadata, checksums, provenance and identifiers. Anything that only exists once the
                 package is deposited in Zenodo (DOI, landing page, indexing) is scored 3, not 4.
 
-Scores are justified with evidence, including F-UJI results (src/run_fuji_assessment.py).
+Scores are justified with evidence, including F-UJI results (src/run_fuji_assessment.py, metrics v0.8).
 """
 from __future__ import annotations
 
@@ -29,7 +31,7 @@ N_VARIABLES = len(RESULTS_COLUMNS)
 
 # Reference palette of the dataviz method (light surface); slots validated as a pair.
 SURFACE, INK, INK_2, MUTED, GRID, BASELINE = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
-SERIES = ("#2a78d6", "#eb6834", "#1baf7a")
+SERIES = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100")
 
 FRAMEWORK_DIR = config.FAIR_DIR / "framework_evidence"
 RDA_WORKBOOK = FRAMEWORK_DIR / "FAIR_evaluation_levels_v0.02.xlsx"
@@ -41,19 +43,19 @@ MATURITY_LABELS = {0: "not applicable", 1: "not being considered yet",
 
 # indicator_id: (as_obtained score, evidence, curated score, evidence, related F-UJI metric)
 ASSESSMENT: dict[str, tuple[int, str, int, str, str]] = {
-    "RDA-F1-01M": (1, "No persistent identifier for any metadata; the only metadata is a project README reached by a GitHub URL. F-UJI FsF-F1-02D = 0 for GitHub, Jolpica and Kaggle.",
-                   3, "DataCite record prepared for a Zenodo deposit, which assigns a DOI to the record; DOI not minted yet.", "FsF-F1-02D"),
-    "RDA-F1-01D": (1, "racing_f1_data.zip and the API responses have no DOI/Handle/ARK. F-UJI FsF-F1-02D = 0.",
-                   3, "Zenodo DOI (prefix 10.5281) planned for the curated package; placeholder 10.5281/zenodo.TO-BE-MINTED in the metadata.", "FsF-F1-02D"),
+    "RDA-F1-01M": (1, "No persistent identifier for any metadata; the only metadata is a project README reached by a GitHub URL. F-UJI FsF-F1-02MD = 0 for GitHub, Jolpica and Kaggle.",
+                   3, "DataCite record prepared for a Zenodo deposit; the group's Zenodo deposit of the raw archive (DOI 10.5281/zenodo.23416916, 16 Oct 2026) scores FsF-F1-02MD = 1, but the curated package's own DOI is not minted yet.", "FsF-F1-02MD"),
+    "RDA-F1-01D": (1, "As obtained, racing_f1_data.zip (GitHub) and the API responses have no DOI/Handle/ARK. F-UJI FsF-F1-02MD = 0 for GitHub, Jolpica and Kaggle.",
+                   3, "The source archive now has a DOI (the group's Zenodo deposit of the raw archive (DOI 10.5281/zenodo.23416916, 16 Oct 2026)), cited as IsDerivedFrom; the curated package's own DOI is planned (placeholder 10.5281/zenodo.TO-BE-MINTED).", "FsF-F1-02MD"),
     "RDA-F1-02M": (3, "README has a unique but non-persistent URL and describes the software project, not the dataset.",
-                   3, "Metadata files have unique repository paths; the record identifier will be the DOI once minted.", "FsF-F1-01D"),
-    "RDA-F1-02D": (4, "Unique URLs exist for the archive (GitHub) and every API endpoint. F-UJI FsF-F1-01D = 1 for GitHub and Jolpica.",
-                   4, "Each distribution is identified by URL and SHA-256 content hash (schema.org sha256, Data Package hash).", "FsF-F1-01D"),
-    "RDA-F2-01M": (2, "No dataset title, creator, keywords or summary; the README documents the pipeline. F-UJI FsF-F2-01M = 0.5/2 (GitHub), 0/2 (Jolpica).",
+                   3, "Metadata files have unique repository paths; the record identifier will be the DOI once minted.", "FsF-F1-01MD"),
+    "RDA-F1-02D": (4, "Unique URLs exist for the archive (GitHub) and every API endpoint. F-UJI FsF-F1-01MD = 1 for all four evaluated locations.",
+                   4, "Each distribution is identified by URL and SHA-256 content hash (schema.org sha256, Data Package hash).", "FsF-F1-01MD"),
+    "RDA-F2-01M": (2, "No dataset title, creator, keywords or summary; the README documents the pipeline. F-UJI FsF-F2-01M = 0/2 for GitHub, Jolpica and Kaggle.",
                    4, f"DataCite 4.5 mandatory and recommended properties plus schema.org Dataset with {N_VARIABLES} variableMeasured entries.", "FsF-F2-01M"),
     "RDA-F3-01M": (1, "No metadata record contains the identifier of the data. F-UJI FsF-F3-01M = 0 for GitHub and Jolpica.",
                    3, "DataCite identifier and schema.org distribution/contentUrl reference the data; final DOI pending.", "FsF-F3-01M"),
-    "RDA-F4-01M": (2, "GitHub exposes generic page metadata only; the API exposes none. F-UJI FsF-F4-01M = 1/2 (GitHub), 0/2 (Jolpica).",
+    "RDA-F4-01M": (2, "GitHub exposes generic page metadata only (F-UJI FsF-F4-01M = 2/2, for the repository page, not the dataset); the API exposes none (0/2).",
                    3, "schema.org JSON-LD ready for Google Dataset Search; Zenodo exposes DataCite and OAI-PMH after deposit.", "FsF-F4-01M"),
     "RDA-A1-01M": (1, "No access level or access conditions stated. F-UJI FsF-A1-01M = 0 for GitHub and Jolpica.",
                    4, "Open access stated in DataCite rightsList and schema.org isAccessibleForFree/conditionsOfAccess.", "FsF-A1-01M"),
@@ -65,10 +67,10 @@ ASSESSMENT: dict[str, tuple[int, str, int, str, str]] = {
                    3, "DOI will resolve to the Zenodo landing page with the DataCite record; pending deposit.", ""),
     "RDA-A1-03D": (4, "Archive URL and API endpoints resolve (http redirects 301 to https).",
                    3, "Data resolve through repository URLs now; DOI resolution pending deposit.", ""),
-    "RDA-A1-04M": (4, "Metadata served over HTTPS. F-UJI FsF-A1-02M = 1 for all resources.",
-                   4, "Metadata served over HTTPS (GitHub; Zenodo after deposit).", "FsF-A1-02M"),
-    "RDA-A1-04D": (3, "Data downloadable over HTTPS, but no machine-discoverable data link. F-UJI FsF-A1-03D = 0 for GitHub and Jolpica.",
-                   4, "schema.org DataDownload entries with HTTPS contentUrl and encodingFormat.", "FsF-A1-03D"),
+    "RDA-A1-04M": (4, "Metadata served over HTTPS. F-UJI FsF-A1.1-01MD = 1/2 for GitHub and Jolpica (2/2 for Kaggle and the Zenodo deposit).",
+                   4, "Metadata served over HTTPS (GitHub; Zenodo after deposit).", "FsF-A1.1-01MD"),
+    "RDA-A1-04D": (3, "Data downloadable over HTTPS, but no machine-discoverable data link. F-UJI FsF-A1-02MD = 1/2 (GitHub), 0/2 (Jolpica).",
+                   4, "schema.org DataDownload entries with HTTPS contentUrl and encodingFormat.", "FsF-A1-02MD"),
     "RDA-A1-05D": (4, "REST API and raw GitHub URLs allow scripted access.",
                    4, "Direct CSV URLs plus a reproducible loader (src/build_raw_dataset.py).", ""),
     "RDA-A1.1-01M": (4, "HTTPS is free, open and universally implemented.", 4, "Same.", ""),
@@ -76,11 +78,11 @@ ASSESSMENT: dict[str, tuple[int, str, int, str, str]] = {
     "RDA-A1.2-01D": (4, "HTTPS supports authentication and authorisation (not required: open data).", 4, "Same.", ""),
     "RDA-A2-01M": (1, "No persistence guarantee: the original Ergast API and its terms page are offline (404, Wayback copy only); a GitHub repository can be deleted.",
                    3, "Zenodo keeps metadata (tombstone page) even if files are withdrawn; pending deposit.", ""),
-    "RDA-I1-01M": (2, "Only generic GitHub page metadata; no formal representation of the dataset. F-UJI FsF-I1-01M = 1/2 (GitHub), 0/2 (Jolpica).",
+    "RDA-I1-01M": (2, "Only generic GitHub page metadata; no formal representation of the dataset. F-UJI FsF-I1-01M = 2/2 for GitHub (generic repository page), 0/2 (Jolpica).",
                    4, "DataCite XML (validated against the 4.5 XSD) and JSON-LD.", "FsF-I1-01M"),
     "RDA-I1-01D": (3, "Standard formats (CSV, JSON), but mixed in one package: JSON Lines, pretty-printed JSON arrays, CSV and OS files (.DS_Store).",
                    4, "Uniform UTF-8 CSV (RFC 4180) with a Frictionless Table Schema.", ""),
-    "RDA-I1-02M": (2, "No machine-understandable description of the dataset itself. F-UJI FsF-I1-01M partial for GitHub only.",
+    "RDA-I1-02M": (2, "No machine-understandable description of the dataset itself. F-UJI FsF-I1-01M credits only GitHub's generic page metadata.",
                    4, "schema.org JSON-LD (RDF) with typed properties.", "FsF-I1-01M"),
     "RDA-I1-02D": (1, "Plain JSON/CSV fields with no semantic annotation of columns or values.",
                    3, "Columns described with schema.org PropertyValue and typed in a Table Schema; the data themselves are not RDF.", ""),
@@ -100,15 +102,15 @@ ASSESSMENT: dict[str, tuple[int, str, int, str, str]] = {
                    4, "DataCite relationType values (IsDerivedFrom, IsSupplementTo, References, IsDocumentedBy).", ""),
     "RDA-I3-04M": (1, "No qualified references to data.",
                    4, "relatedIdentifier with relationType and resourceTypeGeneral for every source dataset.", ""),
-    "RDA-R1-01M": (2, "No variable descriptions, units, coverage or quality notes. F-UJI FsF-R1-01MD = 1/4 (GitHub), 0/4 (Jolpica).",
-                   4, "Data dictionary for every column (type, unit/format, allowed values, source field), temporal and spatial coverage, quality notes.", "FsF-R1-01MD"),
+    "RDA-R1-01M": (2, "No variable descriptions, units, coverage or quality notes. F-UJI FsF-R1-01M = 1/2 (GitHub), 0/2 (Jolpica).",
+                   4, "Data dictionary for every column (type, unit/format, allowed values, source field), temporal and spatial coverage, quality notes.", "FsF-R1-01M"),
     "RDA-R1.1-01M": (1, "The README declares 'MIT License' for the whole project, which conflicts with the upstream data licence CC BY-NC-SA 4.0; no data licence. F-UJI FsF-R1.1-01M = 0.",
                      4, "CC BY-NC-SA 4.0 declared, consistent with the Jolpica terms (ShareAlike).", "FsF-R1.1-01M"),
     "RDA-R1.1-02M": (2, "MIT is a standard licence, but it applies to software and is not valid for this data.",
                      4, "Standard Creative Commons licence with legal-code URI.", "FsF-R1.1-01M"),
     "RDA-R1.1-03M": (1, "No machine-readable licence (no LICENSE file, no licence metadata).",
                      4, "SPDX identifier CC-BY-NC-SA-4.0 with rightsURI in DataCite, schema.org license and datapackage.json.", "FsF-R1.1-01M"),
-    "RDA-R1.2-01M": (2, "The repository does not name Ergast or Jolpica as the source; no checksums or transformation history. F-UJI FsF-R1.2-01M = 1/2 (GitHub, repository dates only).",
+    "RDA-R1.2-01M": (2, "The repository does not name Ergast or Jolpica as the source; no checksums or transformation history. F-UJI FsF-R1.2-01M = 1/1 for GitHub (repository dates only), 0/1 (Jolpica).",
                      4, "DataCite IsDerivedFrom, Created/Collected dates, SHA-256 source manifest of all 93 archive members and a step-by-step cleaning audit log.", "FsF-R1.2-01M"),
     "RDA-R1.2-02M": (1, "No provenance in a cross-community language.",
                      4, "W3C PROV-O provenance graph (JSON-LD): source entity, cleaning activities and derived files.", ""),
@@ -125,17 +127,17 @@ ASSESSMENT: dict[str, tuple[int, str, int, str, str]] = {
 GAPS = [
     {"gap_id": "G1", "title": "No persistent identifier for the data or metadata",
      "indicators": "RDA-F1-01D; RDA-F1-01M; RDA-F3-01M; RDA-A1-03D",
-     "evidence": "F-UJI FsF-F1-02D = 0 for the GitHub archive, the Jolpica API and even the Kaggle mirror; data are only reachable by mutable URLs.",
-     "improvement": "Publish each release of the curated package through the GitHub-Zenodo integration to mint a versioned DOI (prefix 10.5281) and a concept DOI; cite the DOI in README and CITATION.cff.",
-     "status_in_package": "Prepared (DataCite record with DOI placeholder); minting requires the group's Zenodo account."},
+     "evidence": "F-UJI FsF-F1-02MD = 0 for the GitHub archive, the Jolpica API and even the Kaggle mirror; data are only reachable by mutable URLs. The group's Zenodo deposit of the raw archive (DOI 10.5281/zenodo.23416916, 16 Oct 2026) scores 1 and lifts the archive to 84.6% overall (F-UJI v0.8).",
+     "improvement": "Use the Zenodo DOI as the identifier of the source archive (cited IsDerivedFrom and in PROV-O), and deposit the curated package as its own Zenodo record to mint a versioned DOI and a concept DOI; cite both in README and CITATION.cff.",
+     "status_in_package": "Raw archive: implemented (DOI minted by the group, byte-identical to data/source). Curated package: prepared (DataCite record cites the raw DOI; own DOI placeholder)."},
     {"gap_id": "G2", "title": "Missing and conflicting licence information",
      "indicators": "RDA-R1.1-01M; RDA-R1.1-02M; RDA-R1.1-03M",
-     "evidence": "Jolpica TERMS.md (27 Aug 2025): data licensed CC BY-NC-SA 4.0. The group's README declares 'MIT License' for everything; the Kaggle mirror declares CC0 although Ergast allowed non-commercial use only. F-UJI FsF-R1.1-01M = 0 for GitHub and Jolpica.",
+     "evidence": "Jolpica TERMS.md (27 Aug 2025): data licensed CC BY-NC-SA 4.0. The group's README declares 'MIT License' for everything; the Kaggle mirror declares CC0 although Ergast allowed non-commercial use only; the group's Zenodo record declares CC BY 4.0, which drops the non-commercial and share-alike conditions. F-UJI FsF-R1.1-01M = 0 for GitHub and Jolpica and 1 for Kaggle and Zenodo, because it checks that a licence is present, not that it is compatible.",
      "improvement": "License the data CC BY-NC-SA 4.0 (ShareAlike obliges it), add LICENSE-DATA with the SPDX id CC-BY-NC-SA-4.0 and the legal-code URI, keep MIT for code only, and attribute Jolpica-F1 and Ergast.",
-     "status_in_package": "Implemented in DataCite rightsList, schema.org license and datapackage.json."},
+     "status_in_package": "Implemented in DataCite rightsList, schema.org license and datapackage.json; the Zenodo record's licence must be corrected to CC BY-NC-SA 4.0 (a metadata edit, the DOI does not change)."},
     {"gap_id": "G3", "title": "No machine-readable, standard dataset metadata",
      "indicators": "RDA-F2-01M; RDA-F4-01M; RDA-I1-01M; RDA-R1-01M; RDA-R1.3-01M; RDA-R1.3-02M",
-     "evidence": "Only a pipeline README; F-UJI FsF-F2-01M = 0.5/2 (GitHub) and 0/2 (Jolpica); FsF-R1-01MD = 1/4 and 0/4.",
+     "evidence": "Only a pipeline README; F-UJI FsF-F2-01M = 0/2 (GitHub, Jolpica); FsF-R1-01M = 1/2 (GitHub) and 0/2 (Jolpica).",
      "improvement": "Ship a DataCite 4.5 record (XML validated against the XSD), schema.org Dataset JSON-LD for search engines and a Frictionless Data Package with a full data dictionary.",
      "status_in_package": "Implemented."},
     {"gap_id": "G4", "title": "Non-standard vocabularies inside the data",
@@ -157,7 +159,7 @@ GAPS = [
      "indicators": "RDA-A2-01M",
      "evidence": "The Ergast API was shut down and is only mirrored by a volunteer project (Jolpica) that 'does not guarantee uptime'; GitHub repositories can be deleted.",
      "improvement": "Deposit in a certified repository (Zenodo/CERN) whose policy keeps metadata and a tombstone page after withdrawal.",
-     "status_in_package": "Proposed; requires deposit."},
+     "status_in_package": "Raw archive deposited in Zenodo by the group (16 Oct 2026); deposit of the curated package proposed."},
 ]
 
 
@@ -295,7 +297,8 @@ def plot_fuji_summary(path) -> None:
     fuji = pd.read_csv(config.FAIR_DIR / "fuji_summary.csv")
     labels = {"github_repository": "Group GitHub repository (raw zip)",
               "jolpica_ergast_api": "Jolpica Ergast API (download source)",
-              "kaggle_ergast_mirror": "Kaggle Ergast mirror"}
+              "kaggle_ergast_mirror": "Kaggle Ergast mirror",
+              "zenodo_raw_archive": "Group Zenodo record of the raw zip (DOI)"}
     principles = (("F_percent", "Findable"), ("A_percent", "Accessible"), ("I_percent", "Interoperable"),
                   ("R_percent", "Reusable"), ("fair_percent", "Overall FAIR"))
     plt.rcParams["font.family"] = ["Segoe UI", "DejaVu Sans"]
@@ -304,20 +307,22 @@ def plot_fuji_summary(path) -> None:
     _style_axes(ax)
     ax.xaxis.grid(False)
     ax.yaxis.grid(True, color=GRID, linewidth=0.8)
-    width = 0.26
+    width = 0.8 / len(fuji)
     for i, (_, row) in enumerate(fuji.iterrows()):
-        xs = [p + (i - 1) * (width + 0.02) for p in range(len(principles))]
+        xs = [p + (i - (len(fuji) - 1) / 2) * width for p in range(len(principles))]
         vals = [row[c] for c, _ in principles]
         ax.bar(xs, vals, width=width, color=SERIES[i], edgecolor=SURFACE, linewidth=2,
-               label=f"{labels.get(row['resource'], row['resource'])}: {row['fair_percent']:.0f}% overall")
-        ax.text(xs[-1], vals[-1] + 2, f"{vals[-1]:.0f}%", ha="center", fontsize=8.5, color=INK_2)
+               label=f"{labels.get(row['resource'], row['resource'])}: {row['fair_percent']:.1f}% overall")
+        ax.text(xs[-1], vals[-1] + 2, f"{vals[-1]:.1f}%", ha="center", fontsize=7.5, color=INK_2)
     ax.set_xticks(range(len(principles)), [n for _, n in principles], color=INK, fontsize=9.5)
     ax.set_ylim(0, 106)
     ax.set_yticks([0, 25, 50, 75, 100], ["0%", "25%", "50%", "75%", "100%"])
     ax.set_ylabel("F-UJI score (% of points earned)", color=INK_2, fontsize=9)
-    fig.suptitle("Automated FAIR assessment with F-UJI (metrics v0.5)", x=0.02, ha="left",
-                 fontsize=12.5, color=INK, fontweight="bold", y=0.98)
-    fig.text(0.02, 0.915, "Evaluated on 9 Nov 2026 with a local F-UJI 4.0.1 server; raw JSON in outputs/component_a_fair/fuji/.",
+    when = pd.to_datetime(fuji["evaluated_at_utc"]).max().strftime("%d %b %Y").lstrip("0")
+    fig.suptitle(f"Automated FAIR assessment with F-UJI (metrics v{fuji['metric_version'].iloc[0]})", x=0.02,
+                 ha="left", fontsize=12.5, color=INK, fontweight="bold", y=0.98)
+    fig.text(0.02, 0.915, f"Evaluated on {when} with a local F-UJI {fuji['software_version'].iloc[0]} server "
+             "(same metric version as f-uji.net); raw JSON in outputs/component_a_fair/fuji/.",
              fontsize=8.5, color=INK_2, ha="left")
     handles, legend_labels = ax.get_legend_handles_labels()
     fig.legend(handles, legend_labels, loc="upper left", bbox_to_anchor=(0.02, 0.89), ncol=1, frameon=False,

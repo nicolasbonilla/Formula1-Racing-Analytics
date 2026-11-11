@@ -58,8 +58,10 @@ SOURCES = {
                     "type": "Service", "relation": "IsDerivedFrom"},
     "ergast": {"url": "http://ergast.com/mrd/", "name": "Ergast Developer API (discontinued)",
                "type": "Service", "relation": "IsDerivedFrom"},
-    "raw_archive": {"url": f"{REPOSITORY_URL}/blob/main/racing_f1_data.zip",
-                    "name": "racing_f1_data.zip (raw archive)", "type": "Dataset", "relation": "IsDerivedFrom"},
+    "raw_archive": {"url": "https://doi.org/10.5281/zenodo.23416916", "identifier": "10.5281/zenodo.23416916",
+                    "id_type": "DOI", "name": "racing_f1_data.zip (raw archive on Zenodo, DOI 10.5281/zenodo.23416916)",
+                    "type": "Dataset", "relation": "IsDerivedFrom",
+                    "copy": f"{REPOSITORY_URL}/blob/main/racing_f1_data.zip"},
     "repository": {"url": REPOSITORY_URL, "name": "Formula1-Racing-Analytics repository",
                    "type": "Software", "relation": "IsSupplementTo"},
     "kaggle": {"url": "https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020",
@@ -196,7 +198,8 @@ def descriptions(ds: dict) -> list[dict]:
             "identifiers and free-text categories were resolved; legitimate historical shared drives were kept "
             "and flagged; ISO 3166 country codes and Wikidata identifiers were added.")
     methods = (
-        "Extracted from racing_f1_data.zip (SHA-256 " + config.SOURCE_ARCHIVE_SHA256 + ") without modifying "
+        "Extracted from racing_f1_data.zip (Zenodo DOI 10.5281/zenodo.23416916; SHA-256 "
+        + config.SOURCE_ARCHIVE_SHA256 + ") without modifying "
         "values, profiled across completeness, uniqueness, validity, consistency, accuracy and timeliness, "
         "and cleaned with a reproducible Python/pandas pipeline that logs before/after statistics for every "
         "step. Source code, audit log and quality report are part of the package.")
@@ -204,8 +207,9 @@ def descriptions(ds: dict) -> list[dict]:
         "UTF-8 encoded CSV (RFC 4180), comma separated, header row, ISO 8601 dates. Primary key of the fact "
         f"table: {', '.join(RESULTS_PRIMARY_KEY)}. Column definitions in data_dictionary.csv and datapackage.json.")
     other = ("Points follow the scoring rules of each season; use points_normalised for cross-era comparisons. "
-             "Indianapolis 500 rounds (1950-1960) are flagged with is_indy500. Prepared for deposit in Zenodo; "
-             "the DOI shown is a placeholder until minted.")
+             "Indianapolis 500 rounds (1950-1960) are flagged with is_indy500. The raw archive this package is "
+             "derived from has the DOI 10.5281/zenodo.23416916; the curated package is prepared for deposit in "
+             "Zenodo as its own record, and the DOI shown for it is a placeholder until minted.")
     return [{"description": abstract, "descriptionType": "Abstract"},
             {"description": methods, "descriptionType": "Methods"},
             {"description": technical, "descriptionType": "TechnicalInfo"},
@@ -241,7 +245,8 @@ def datacite_attributes(ds: dict, facts: list[dict], points: pd.DataFrame) -> di
                    "dateInformation": "Temporal coverage: first and last race day in the dataset"}],
         "language": "en",
         "types": {"resourceTypeGeneral": "Dataset", "resourceType": "Tabular sports results"},
-        "relatedIdentifiers": [{"relatedIdentifier": s["url"], "relatedIdentifierType": "URL",
+        "relatedIdentifiers": [{"relatedIdentifier": s.get("identifier", s["url"]),
+                                "relatedIdentifierType": s.get("id_type", "URL"),
                                 "relationType": s["relation"], "resourceTypeGeneral": s["type"]}
                                for s in SOURCES.values()],
         "sizes": [f"{f['file_name']}: {f['rows']} rows, {f['bytes']} bytes" for f in facts],
@@ -501,7 +506,9 @@ def provenance(facts: list[dict], raw_mode: bool) -> dict:
          "prov:wasDerivedFrom": {"@id": SOURCES["ergast"]["url"]}},
         {"@id": SOURCES["ergast"]["url"], "@type": "prov:Entity", "rdfs:label": SOURCES["ergast"]["name"]},
         {"@id": base + "entity/racing_f1_data.zip", "@type": "prov:Entity", "rdfs:label": "racing_f1_data.zip",
-         "prov:atLocation": SOURCES["raw_archive"]["url"], "schema:sha256": config.SOURCE_ARCHIVE_SHA256,
+         "schema:identifier": "https://doi.org/10.5281/zenodo.23416916",
+         "prov:atLocation": [SOURCES["raw_archive"]["url"], SOURCES["raw_archive"]["copy"]],
+         "schema:sha256": config.SOURCE_ARCHIVE_SHA256,
          "prov:wasDerivedFrom": {"@id": SOURCES["jolpica_api"]["url"]}},
         {"@id": base + "activity/step0_extract", "@type": "prov:Activity",
          "rdfs:label": "Step 0 - flatten the archive to raw CSV without changing values",
@@ -602,7 +609,8 @@ def write_summary(ds: dict, xml_ok: bool, xml_log: str) -> None:
     fuji_path, rda_path = out / "fuji_summary.csv", out / "rda_fair_summary.csv"
     if fuji_path.exists():
         fuji = pd.read_csv(fuji_path)
-        lines += ["## Automated assessment (F-UJI 4.0.1, metrics v0.5)", "",
+        lines += [f"## Automated assessment (F-UJI {fuji['software_version'].iloc[0]}, metrics "
+                  f"v{fuji['metric_version'].iloc[0]})", "",
                   "| Resource | FAIR | F | A | I | R |", "|---|---|---|---|---|---|"]
         for _, r in fuji.iterrows():
             lines.append(f"| {r['resource']} ({r['url']}) | {r['fair_percent']:.1f}% | {r['F_percent']:.1f}% | "
@@ -630,7 +638,11 @@ def write_summary(ds: dict, xml_ok: bool, xml_log: str) -> None:
     if cov_path.exists():
         cov = pd.read_csv(cov_path)
         lines += ["## Persistent identifiers", "",
-                  f"- Dataset: DOI via Zenodo, placeholder `{DOI_PLACEHOLDER}` (to be minted - never cite before minting).",
+                  "- Raw archive: DOI 10.5281/zenodo.23416916 (Zenodo, published 16 Oct 2026 by Manohar Zalki); "
+                  "byte-identical to data/source/racing_f1_data.zip (size and MD5 checked, "
+                  "data/reference/zenodo_source_record.json).",
+                  f"- Curated package: own DOI still to be minted (placeholder `{DOI_PLACEHOLDER}`, never cite "
+                  "before minting); its metadata already cites the raw archive's DOI (IsDerivedFrom, PROV-O).",
                   "- Creators: ORCID iDs to be added by each student.",
                   f"- Institution: ROR to be confirmed; best candidate {INSTITUTION['ror_candidate']} "
                   "(see data/reference/ror_candidates.csv).",
@@ -647,6 +659,9 @@ def write_summary(ds: dict, xml_ok: bool, xml_log: str) -> None:
               "- Kaggle mirror (rohanrao/formula-1-world-championship-1950-2020, version 24, updated 29 Jan 2025): declared \"CC0: Public Domain\", "
               "although compiled from Ergast, whose terms were non-commercial - a licence inconsistency.",
               "- Group repository README: \"MIT License\" for the whole project, no data licence - conflicts with CC BY-NC-SA 4.0.",
+              "- Zenodo record of the raw archive (10.5281/zenodo.23416916): declares CC BY 4.0, which drops the "
+              "non-commercial and share-alike conditions of the source - to be corrected to CC BY-NC-SA 4.0 "
+              "(a metadata edit; the DOI does not change). F-UJI scores the licence as present, not as compliant.",
               f"- Decision: curated data released under {LICENSE['spdx']} (ShareAlike obligation); MIT kept for code only.", "",
               "## Metadata record", "",
               f"- DataCite 4.5 XML: {'valid' if xml_ok else 'NOT validated'} ({xml_log}).",

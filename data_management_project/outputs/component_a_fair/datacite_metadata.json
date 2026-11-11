@@ -146,7 +146,7 @@
       ],
       "dates": [
         {
-          "date": "2026-11-09",
+          "date": "2026-11-11",
           "dateType": "Created"
         },
         {
@@ -179,8 +179,8 @@
           "resourceTypeGeneral": "Service"
         },
         {
-          "relatedIdentifier": "https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip",
-          "relatedIdentifierType": "URL",
+          "relatedIdentifier": "10.5281/zenodo.23416916",
+          "relatedIdentifierType": "DOI",
           "relationType": "IsDerivedFrom",
           "resourceTypeGeneral": "Dataset"
         },
@@ -226,7 +226,7 @@
           "descriptionType": "Abstract"
         },
         {
-          "description": "Extracted from racing_f1_data.zip (SHA-256 81b027c4221901d92d30ad7b76eacf22668d299098e5c16dcb391c91fd39c748) without modifying values, profiled across completeness, uniqueness, validity, consistency, accuracy and timeliness, and cleaned with a reproducible Python/pandas pipeline that logs before/after statistics for every step. Source code, audit log and quality report are part of the package.",
+          "description": "Extracted from racing_f1_data.zip (Zenodo DOI 10.5281/zenodo.23416916; SHA-256 81b027c4221901d92d30ad7b76eacf22668d299098e5c16dcb391c91fd39c748) without modifying values, profiled across completeness, uniqueness, validity, consistency, accuracy and timeliness, and cleaned with a reproducible Python/pandas pipeline that logs before/after statistics for every step. Source code, audit log and quality report are part of the package.",
           "descriptionType": "Methods"
         },
         {
@@ -234,7 +234,7 @@
           "descriptionType": "TechnicalInfo"
         },
         {
-          "description": "Points follow the scoring rules of each season; use points_normalised for cross-era comparisons. Indianapolis 500 rounds (1950-1960) are flagged with is_indy500. Prepared for deposit in Zenodo; the DOI shown is a placeholder until minted.",
+          "description": "Points follow the scoring rules of each season; use points_normalised for cross-era comparisons. Indianapolis 500 rounds (1950-1960) are flagged with is_indy500. The raw archive this package is derived from has the DOI 10.5281/zenodo.23416916; the curated package is prepared for deposit in Zenodo as its own record, and the DOI shown for it is a placeholder until minted.",
           "descriptionType": "Other"
         }
       ],

@@ -10,6 +10,7 @@ Curated, quality-assessed and FAIR-documented Formula 1 World Championship race 
 | C - Data cleaning & pipeline | Nicolas Bonilla | `src/cleaning.py`, `src/vocabularies.py`, `src/schema.py` | `data/cleaned/`, `outputs/component_c_cleaning/` |
 | Graph modelling (shared) | all | `src/graph_model.py` | `outputs/graph/` |
 | Interactive dashboard (shared) | all | `../dashboard/build_web_data.py`, `../dashboard/static/` | `../dashboard/static/data.js`, `outputs/dashboard/` |
+| Ask-the-data assistant (idea and prototype: Manohar Zalki) | all | `src/assistant/` | `outputs/assistant/`, `data/reference/official_champions.csv` |
 | Architecture diagram | all | `src/architecture.py` | `outputs/architecture/` |
 | Report and slides | all | `src/build_report.py`, `src/build_slides.py` | `report/` |
 
@@ -28,7 +29,7 @@ cd data_management_project
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python run_all.py --from-scratch   # rebuild every dataset, table and figure (~90 s)
-python -m pytest -q                # 14 tests on the key cleaning decisions
+python -m pytest -q                # 28 tests: cleaning decisions and the assistant
 python -m src.build_report         # joint report (Word + PDF)
 python -m src.build_slides         # presentation deck (PowerPoint + PDF) and presenter script
 python build_submission.py         # group ZIP for the course portal -> dist/
@@ -38,6 +39,8 @@ Windows (PowerShell): the same commands, with `py -3.11 -m venv .venv` and `.ven
 
 Everything the pipeline produces is already committed, so the report (`report/`), the slides
 (`report/presentation/`), the submission ZIP (`dist/`) and the dashboard open without running anything.
+The slides use the dashboard's fonts (Titillium Web, Source Serif 4; OFL licence, in `report/assets/fonts/`):
+present from the PDF, which embeds them, or install the fonts before opening or rebuilding the PowerPoint.
 A run from scratch must print these hashes for the cleaned files (the CSVs are stored byte-for-byte, see
 `.gitattributes`):
 
@@ -64,6 +67,36 @@ revealed issue B29 (retirement causes not recorded from 2023). The earlier multi
 Spark gold layer (sections RQ1-RQ6) is kept unchanged as `../dashboard/app_classic.py`
 (`streamlit run app_classic.py`).
 
+## Ask-the-data assistant
+
+The served zone also answers questions in English or Spanish ("How many Grands Prix has Lewis Hamilton
+won?", "¿Quién ganó el campeonato de 1988?"). It rebuilds Manohar Zalki's Graphic-LlmRag prototype
+(FastAPI + Ollama Llama 3 + hybrid vector/graph retrieval + ML engine) on the validated data:
+
+1. **Understand**: drivers, teams, circuits, Grands Prix and seasons are found in the question.
+2. **Evidence**: exact figures computed with pandas from `data/cleaned/` (with file, SHA-256, filter,
+   rows and raw `source_file:source_line`), team-mate chains from the graph, the podium model, and the best
+   of 1,324 knowledge documents (BM25 keywords, plus semantic vectors when computed).
+3. **Write**: the local Llama 3 answers from that evidence only and cites it ([S1], [S2]).
+4. **Check**: every number in the answer is looked up in the evidence; untraceable figures are flagged.
+
+World Champions come from Wikidata and are reconciled with our points (1964 and 1988 differ because of
+the dropped-scores rule). The podium model uses only pre-race information and a time-based split (train
+1950-2013, choose on 2014-2019, test once on 2020-2025); its scores are computed, see
+`outputs/assistant/podium_model_card.json`. Benchmark: `python -m src.assistant.evaluate [--llm]`.
+
+```bash
+# optional, for written answers: install Ollama (https://ollama.com), then
+ollama pull llama3 && ollama pull nomic-embed-text
+python -m src.assistant.api                  # http://127.0.0.1:8000/docs (the dashboard starts it itself)
+python -m src.assistant.knowledge --embed    # optional: semantic vectors for the documents
+```
+
+Without Ollama the assistant still returns the evidence. On a laptop CPU the written answer takes
+15-60 s; with a GPU (Apple Silicon, NVIDIA) a few seconds. `F1_ASSISTANT_MODEL=llama3.2:3b` selects a
+lighter model. The `/chat` endpoint keeps the prototype's contract, so `../dashboard/app_classic.py`
+(page RQ6) works on top of the same engine.
+
 ## Data flow
 
 ```
@@ -75,6 +108,7 @@ data/source/racing_f1_data.zip          original package (SHA-256 81b027c4...c74
   -> outputs/graph/                     property graph + team-mate network (GEXF for Gephi), metrics
   -> outputs/component_a_fair/          F-UJI evidence, RDA scores, DataCite 4.5, schema.org, PROV-O
   -> ../dashboard/static/data.js        interactive dashboard (served zone)
+  -> outputs/assistant/                 podium model card, knowledge documents, benchmark (served zone API)
 ```
 
 ## Before submission (group to complete)
@@ -82,8 +116,9 @@ data/source/racing_f1_data.zip          original package (SHA-256 81b027c4...c74
 1. Add ORCID iDs in `src/config.py` (`TEAM`), and confirm who presents each block, then re-run
    `python run_all.py`, `python -m src.build_report` and `python -m src.build_slides`.
 2. Confirm the institution ROR in `src/metadata.py` (candidate: https://ror.org/00g07sz63).
-3. Optionally deposit `data/cleaned/` on Zenodo to mint the DOI that replaces
-   `10.5281/zenodo.TO-BE-MINTED`.
+3. The raw archive already has a DOI (10.5281/zenodo.23416916). Correct that Zenodo record's licence to
+   CC BY-NC-SA 4.0 (see report/zenodo_record_corrections.md), and optionally deposit `data/cleaned/` as its
+   own record to replace the placeholder `10.5281/zenodo.TO-BE-MINTED`.
 4. Personalise the reflection drafts in `report/reflection_drafts/` (each student submits their own).
 
 ## Re-running the live F-UJI assessment (optional)

@@ -55,7 +55,7 @@
     </contributor>
   </contributors>
   <dates>
-    <date dateType="Created">2026-11-09</date>
+    <date dateType="Created">2026-11-11</date>
     <date dateType="Collected" dateInformation="Modification dates of the files in the raw archive">2026-10-15</date>
     <date dateType="Other" dateInformation="Temporal coverage: first and last race day in the dataset">1950-05-13/2025-12-07</date>
   </dates>
@@ -63,7 +63,7 @@
   <relatedIdentifiers>
     <relatedIdentifier relatedIdentifierType="URL" relationType="IsDerivedFrom" resourceTypeGeneral="Service">https://api.jolpi.ca/ergast/f1/</relatedIdentifier>
     <relatedIdentifier relatedIdentifierType="URL" relationType="IsDerivedFrom" resourceTypeGeneral="Service">http://ergast.com/mrd/</relatedIdentifier>
-    <relatedIdentifier relatedIdentifierType="URL" relationType="IsDerivedFrom" resourceTypeGeneral="Dataset">https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip</relatedIdentifier>
+    <relatedIdentifier relatedIdentifierType="DOI" relationType="IsDerivedFrom" resourceTypeGeneral="Dataset">10.5281/zenodo.23416916</relatedIdentifier>
     <relatedIdentifier relatedIdentifierType="URL" relationType="IsSupplementTo" resourceTypeGeneral="Software">https://github.com/zalkimanohar/Formula1-Racing-Analytics</relatedIdentifier>
     <relatedIdentifier relatedIdentifierType="URL" relationType="References" resourceTypeGeneral="Dataset">https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020</relatedIdentifier>
   </relatedIdentifiers>
@@ -85,9 +85,9 @@
   </rightsList>
   <descriptions>
     <description xml:lang="en" descriptionType="Abstract">Race results of every FIA Formula One World Championship Grand Prix from 1950-05-13 to 2025-12-07 (76 seasons, 1149 Grands Prix, 25,873 driver entries, 817 drivers, 203 constructor entries, 77 circuits in 34 countries). The dataset is a cleaned, documented derivative of the Ergast database as served by the Jolpica-F1 API. Duplicates, missing keys, sentinel values, inconsistent identifiers and free-text categories were resolved; legitimate historical shared drives were kept and flagged; ISO 3166 country codes and Wikidata identifiers were added.</description>
-    <description xml:lang="en" descriptionType="Methods">Extracted from racing_f1_data.zip (SHA-256 81b027c4221901d92d30ad7b76eacf22668d299098e5c16dcb391c91fd39c748) without modifying values, profiled across completeness, uniqueness, validity, consistency, accuracy and timeliness, and cleaned with a reproducible Python/pandas pipeline that logs before/after statistics for every step. Source code, audit log and quality report are part of the package.</description>
+    <description xml:lang="en" descriptionType="Methods">Extracted from racing_f1_data.zip (Zenodo DOI 10.5281/zenodo.23416916; SHA-256 81b027c4221901d92d30ad7b76eacf22668d299098e5c16dcb391c91fd39c748) without modifying values, profiled across completeness, uniqueness, validity, consistency, accuracy and timeliness, and cleaned with a reproducible Python/pandas pipeline that logs before/after statistics for every step. Source code, audit log and quality report are part of the package.</description>
     <description xml:lang="en" descriptionType="TechnicalInfo">UTF-8 encoded CSV (RFC 4180), comma separated, header row, ISO 8601 dates. Primary key of the fact table: result_id. Column definitions in data_dictionary.csv and datapackage.json.</description>
-    <description xml:lang="en" descriptionType="Other">Points follow the scoring rules of each season; use points_normalised for cross-era comparisons. Indianapolis 500 rounds (1950-1960) are flagged with is_indy500. Prepared for deposit in Zenodo; the DOI shown is a placeholder until minted.</description>
+    <description xml:lang="en" descriptionType="Other">Points follow the scoring rules of each season; use points_normalised for cross-era comparisons. Indianapolis 500 rounds (1950-1960) are flagged with is_indy500. The raw archive this package is derived from has the DOI 10.5281/zenodo.23416916; the curated package is prepared for deposit in Zenodo as its own record, and the DOI shown for it is a placeholder until minted.</description>
   </descriptions>
   <geoLocations>
     <geoLocation>

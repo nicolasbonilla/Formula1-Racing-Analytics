@@ -79,6 +79,7 @@ FINAL_DOCS = [
     ("report/presentation/F1_Data_Management_Presentation.pptx", "Presentation (PowerPoint)"),
     ("report/presentation/presenter_script.md", "Presenter script, who says what"),
     ("report/qa_preparation.md", "Q&A preparation"),
+    ("report/zenodo_record_corrections.md", "Corrections for the group's Zenodo record (licence, title, creators)"),
     ("dist/F1_DataManagement_Group_Submission.zip", "Submission ZIP for the course portal"),
 ]
 

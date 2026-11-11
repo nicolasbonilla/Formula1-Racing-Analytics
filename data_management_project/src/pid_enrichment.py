@@ -9,6 +9,7 @@ The module also queries the Research Organization Registry (ROR) for the publish
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import time
 import urllib.parse
@@ -28,6 +29,8 @@ PAUSE_SECONDS = 1.0
 CROSSWALK_CSV = config.REFERENCE_DIR / "wikidata_crosswalk.csv"
 ROR_JSON = config.REFERENCE_DIR / "ror_candidates.json"
 ROR_CSV = config.REFERENCE_DIR / "ror_candidates.csv"
+ZENODO_RECORD = "23416916"
+ZENODO_JSON = config.REFERENCE_DIR / "zenodo_source_record.json"
 ROR_QUERIES = ("SRH University", "SRH Hochschule", "SRH Berlin University of Applied Sciences")
 
 CROSSWALK_COLUMNS = ["entity_type", "entity_id", "source_url", "wikipedia_url", "wikidata_qid",
@@ -138,8 +141,41 @@ def coverage(crosswalk: pd.DataFrame) -> pd.DataFrame:
     return summary.reset_index()
 
 
+def zenodo_source_record(refresh: bool = False) -> dict:
+    """The group's Zenodo deposit of the raw archive (Manohar Zalki, 16 Oct 2026): the DOI of data/source.
+
+    The record's file checksum is compared with the local archive, so the DOI is only used as the identifier of
+    the source if the two are byte-identical. Cached in data/reference/ for offline runs.
+    """
+    if ZENODO_JSON.exists() and not refresh:
+        return json.loads(ZENODO_JSON.read_text(encoding="utf-8"))
+    rec = http_get_json(f"https://zenodo.org/api/records/{ZENODO_RECORD}", {})
+    meta = rec.get("metadata", {})
+    local = config.SOURCE_ARCHIVE.read_bytes()
+    local_md5 = hashlib.md5(local).hexdigest()
+    files = [{"key": f["key"], "size": f["size"], "checksum": f["checksum"]} for f in rec.get("files", [])]
+    match = any(f["checksum"] == f"md5:{local_md5}" and f["size"] == len(local) for f in files)
+    out = {
+        "doi": rec.get("doi"), "doi_url": f"https://doi.org/{rec.get('doi')}", "record_url": rec.get("links", {}).get("self_html"),
+        "title": meta.get("title"), "creators": [c.get("name") for c in meta.get("creators", [])],
+        "publication_date": meta.get("publication_date"), "resource_type": meta.get("resource_type", {}).get("type"),
+        "declared_license": (meta.get("license") or {}).get("id"), "keywords": meta.get("keywords") or [],
+        "files": files, "local_archive": config.SOURCE_ARCHIVE.name, "local_size": len(local), "local_md5": local_md5,
+        "local_sha256": hashlib.sha256(local).hexdigest(), "byte_identical": match,
+        "source_license_required": "CC-BY-NC-SA-4.0",
+        "license_conflict": (meta.get("license") or {}).get("id", "").lower() != "cc-by-nc-sa-4.0",
+        "retrieved_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    ZENODO_JSON.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
+    return out
+
+
 def run(refresh: bool = False) -> pd.DataFrame:
     config.ensure_dirs()
+    z = zenodo_source_record(refresh=refresh)
+    print(f"[PID] source archive DOI {z['doi']} (Zenodo, {z['publication_date']}): byte-identical "
+          f"{z['byte_identical']}; declared licence {z['declared_license']}"
+          + (" - conflicts with the source terms (CC BY-NC-SA 4.0)" if z["license_conflict"] else ""))
     if CROSSWALK_CSV.exists() and not refresh:
         crosswalk = pd.read_csv(CROSSWALK_CSV, dtype=str)
         print(f"[PID] using cached crosswalk {CROSSWALK_CSV.name}")

@@ -6,9 +6,10 @@
 **Decisions and why.** My first decision was to assess FAIRness with two complementary methods instead of
 one. F-UJI gave an automated, reproducible score, but it only sees machine-readable signals that are already
 online, so I also scored all 41 indicators of the RDA FAIR Data Maturity Model with written evidence. I
-evaluated three resources rather than "the dataset": our GitHub repository (31%), the Jolpica API we downloaded
-from (8%) and the Kaggle mirror (65%). This showed that the same data can be very differently FAIR depending on
-where they are published. For the metadata I combined DataCite 4.5 (needed for a DOI deposit), schema.org
+evaluated four locations rather than "the dataset" (F-UJI metrics v0.8): the Jolpica API we downloaded from
+(11.5%), our GitHub repository (42.3%), the Kaggle mirror (84.6%) and our group's Zenodo record of the same raw
+archive (84.6%). The identical zip scores 42.3% on GitHub and 84.6% with a DOI on Zenodo: the same data can be
+very differently FAIR depending on where they are published. For the metadata I combined DataCite 4.5 (needed for a DOI deposit), schema.org
 JSON-LD (for discoverability) and a Frictionless Data Package (to declare keys), and I added a PROV-O graph so
 that provenance is machine-readable. I deliberately kept the DOI as a clearly marked placeholder: a fake DOI
 would have raised the score but would have been dishonest.

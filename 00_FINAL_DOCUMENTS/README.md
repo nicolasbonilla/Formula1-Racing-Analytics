@@ -10,6 +10,7 @@ Group: Chirag Adhikari, Manohar Zalki, Nicolas Bonilla.
 | [F1_Data_Management_Presentation.pptx](F1_Data_Management_Presentation.pptx) | Presentation (PowerPoint) |
 | [presenter_script.md](presenter_script.md) | Presenter script, who says what |
 | [qa_preparation.md](qa_preparation.md) | Q&A preparation |
+| [zenodo_record_corrections.md](zenodo_record_corrections.md) | Corrections for the group's Zenodo record (licence, title, creators) |
 | [F1_DataManagement_Group_Submission.zip](F1_DataManagement_Group_Submission.zip) | Submission ZIP for the course portal |
 | [reflection_drafts/reflection_student_A_FAIR.docx](reflection_drafts/reflection_student_A_FAIR.docx) | Reflection draft to personalise |
 | [reflection_drafts/reflection_student_B_Quality.docx](reflection_drafts/reflection_student_B_Quality.docx) | Reflection draft to personalise |

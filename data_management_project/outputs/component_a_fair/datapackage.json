@@ -4,7 +4,7 @@
   "id": "10.5281/zenodo.TO-BE-MINTED",
   "title": "Formula 1 World Championship Race Results 1950-2025: Curated and Quality-Assessed Dataset",
   "version": "1.0.0",
-  "created": "2026-11-09",
+  "created": "2026-11-11",
   "licenses": [
     {
       "name": "CC-BY-NC-SA-4.0",
@@ -22,8 +22,8 @@
       "path": "http://ergast.com/mrd/"
     },
     {
-      "title": "racing_f1_data.zip (raw archive)",
-      "path": "https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip"
+      "title": "racing_f1_data.zip (raw archive on Zenodo, DOI 10.5281/zenodo.23416916)",
+      "path": "https://doi.org/10.5281/zenodo.23416916"
     }
   ],
   "contributors": [

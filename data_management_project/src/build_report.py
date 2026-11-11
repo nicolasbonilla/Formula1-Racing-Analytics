@@ -66,6 +66,15 @@ def facts() -> dict:
         return "fixed"
 
     buckets = resolution["resolution"].map(bucket).value_counts()
+    asst = config.OUTPUT_DIR / "assistant"
+    card = json.loads((asst / "podium_model_card.json").read_text(encoding="utf-8"))
+    ev_route = json.loads((asst / "evaluation_evidence_summary.json").read_text(encoding="utf-8"))
+    llm_path = asst / "evaluation_llm_summary.json"
+    ev_llm = json.loads(llm_path.read_text(encoding="utf-8")) if llm_path.exists() else {}
+    llm_rows = pd.read_csv(asst / "evaluation_llm.csv") if (asst / "evaluation_llm.csv").exists() else pd.DataFrame()
+    refused = bool(llm_rows.loc[llm_rows["type"] == "must refuse", "in_answer"].all()) if len(llm_rows) else None
+    champs = pd.read_csv(config.REFERENCE_DIR / "official_champions.csv")
+    n_docs = sum(1 for _ in open(asst / "knowledge_documents.jsonl", encoding="utf-8"))
     tests = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q"], cwd=config.PROJECT_ROOT,
                            capture_output=True, text=True).stdout
     n_tests = int(re.search(r"(\d+) tests? collected", tests).group(1)) if "collected" in tests else 0
@@ -96,6 +105,9 @@ def facts() -> dict:
         "fuji_github": fuji.loc["github_repository", "fair_percent"],
         "fuji_jolpica": fuji.loc["jolpica_ergast_api", "fair_percent"],
         "fuji_kaggle": fuji.loc["kaggle_ergast_mirror", "fair_percent"],
+        "fuji_zenodo": fuji.loc["zenodo_raw_archive", "fair_percent"],
+        "fuji_version": str(fuji["metric_version"].iloc[0]),
+        "zenodo": json.loads((config.REFERENCE_DIR / "zenodo_source_record.json").read_text(encoding="utf-8")),
         "rda_before": rda.loc["Overall", "as_obtained_progress_percent"],
         "rda_after": rda.loc["Overall", "curated_progress_percent"],
         "ess_before": rda.loc["Overall", "as_obtained_essential_passed"],
@@ -112,6 +124,9 @@ def facts() -> dict:
         "modularity": net["modularity"], "diameter": int(net["diameter_giant"]),
         "top": top, "path": path, "hops": len(path),
         "indy_rounds": int(clean.loc[clean["is_indy500"], "race_id"].nunique()),
+        "card": card, "ev_route": ev_route, "ev_llm": ev_llm, "refused": refused, "kb_docs": n_docs,
+        "champ_wikidata": int(champs["method"].str.startswith("Wikidata").sum()),
+        "champ_disagree": champs.loc[~champs["agrees_with_points_leader"], "season"].tolist(),
     }
 
 
@@ -420,26 +435,30 @@ def introduction(r: Report, F: dict) -> None:
 def component_a(r: Report, F: dict, figs: dict) -> None:
     r.heading("2. Component A - FAIR Assessment and Metadata Design", 1, count_as="A")
     owner_line(r, 0)
+    z = F["zenodo"]
     r.p("**Assessment.** FAIRness was measured twice, independently. The automated F-UJI tool (version 4.0.1, "
-        "metrics v0.5), run on a local server, tested the three places where the data can be obtained (Figure "
-        f"{figs['fuji']}): the group's GitHub repository scored {pct(F['fuji_github'])}, the Jolpica API used for "
-        f"the download only {pct(F['fuji_jolpica'])}, and the Kaggle mirror {pct(F['fuji_kaggle'])}. Because F-UJI "
+        f"metrics v{F['fuji_version']}, as on the public f-uji.net service), run on a local server, tested the four "
+        f"places where the data can be obtained (Figure {figs['fuji']}): the Jolpica API used for the download "
+        f"scored {pct(F['fuji_jolpica'], 1)}, the group's GitHub repository {pct(F['fuji_github'], 1)}, the Kaggle "
+        f"mirror {pct(F['fuji_kaggle'], 1)} and the group's Zenodo record of the raw archive "
+        f"{pct(F['fuji_zenodo'], 1)}, reproducing the group's earlier web assessment exactly. Because F-UJI "
         "can only inspect what is already online, all 41 indicators of the RDA FAIR Data Maturity Model were also "
         "scored with written evidence, for the data as obtained and for our curated package (Figure "
         f"{figs['rda']}). Overall maturity rises from {pct(F['rda_before'])} to {pct(F['rda_after'])} and the "
-        f"essential indicators met from {F['ess_before']} to {F['ess_after']}. 'Findable' honestly stays at RDA "
-        "level 0 until a DOI is actually minted. The two methods complement each other: F-UJI is reproducible but "
-        "only sees machine-readable signals, while the RDA model also captures licences and provenance documented "
-        "in human-readable form.")
+        f"essential indicators met from {F['ess_before']} to {F['ess_after']}; 'Findable' stays at level 0 until "
+        "the curated package has its own DOI. F-UJI is reproducible but only sees machine-readable signals, while "
+        "the RDA model also captures licences and provenance documented in human-readable form.")
     r.p("**Gaps.** Seven concrete gaps were documented with indicator, evidence and remedy (Appendix A, Table A.1). "
         "The three most important are:")
     r.bullets([
-        "**No persistent identifier** - the data are reachable only through mutable URLs (F-UJI FsF-F1-02D = 0 "
-        "for all three resources). Remedy: deposit each release through the GitHub-Zenodo integration, which mints a "
-        "versioned DOI and a concept DOI.",
+        "**No persistent identifier** - as obtained, the data are reachable only through mutable URLs (F-UJI "
+        "FsF-F1-02MD = 0 for Jolpica, GitHub and Kaggle). Remedy (partly implemented): the group deposited the raw "
+        f"archive on Zenodo (DOI {z['doi']}, byte-identical to our source, checksum verified); the curated "
+        "package cites it and will receive its own DOI.",
         "**Missing and conflicting licences** - Jolpica licenses the data CC BY-NC-SA 4.0 and Ergast allowed only "
-        "non-commercial use, yet the Kaggle mirror claims CC0 and our repository declares MIT for everything. "
-        "Remedy (implemented): data under CC-BY-NC-SA-4.0, MIT for code only, with attribution.",
+        "non-commercial use, yet the Kaggle mirror claims CC0, our repository declares MIT for everything and the "
+        "Zenodo record CC BY 4.0. F-UJI rewards any licence, compatible or not. Remedy: data under "
+        "CC-BY-NC-SA-4.0, MIT for code only, and the Zenodo licence corrected.",
         "**No machine-readable metadata, provenance or controlled vocabularies** - only a README, no checksums, "
         "country names such as 'UK' or 'Korea' and 136 free-text status values. Remedy (implemented): the records "
         "below, ISO codes and an eight-term status vocabulary.",
@@ -449,8 +468,9 @@ def component_a(r: Report, F: dict, figs: dict) -> None:
         "Package that declares primary and foreign keys, and a W3C PROV-O graph linking every output to the 15 "
         "audited cleaning activities. Variable definitions are generated from the same schema module that "
         "Component C validates against, so documentation and data cannot drift apart.")
-    r.p("**Persistent identifiers.** The dataset receives a DOI (a reserved placeholder until deposit, never cited "
-        "before minting), creators ORCID iDs and the institution a ROR identifier (candidate to be confirmed). For "
+    r.p("**Persistent identifiers.** The source archive is identified by its Zenodo DOI, cited as 'IsDerivedFrom' "
+        "in every metadata record; the curated package receives its own DOI (a placeholder until deposit, never "
+        "cited before minting), creators ORCID iDs and the institution a ROR identifier (candidate). For "
         "key variables, countries use ISO 3166-1 alpha-3 codes (ISO 3166-3 for former states such as East Germany), "
         "dates ISO 8601 and licences SPDX. Drivers, constructors and circuits were linked to Wikidata QIDs through "
         f"their Wikipedia URLs, with coverage of {pct(F['qid_driver'], 1)}, {pct(F['qid_con'], 1)} and "
@@ -596,7 +616,8 @@ def dashboard_section(r: Report, F: dict, figs: dict) -> None:
         "`streamlit run app.py`) that turns the validated outputs into seven views (Figure "
         f"{figs['dash']}): constructor eras, an all-time timing tower with an era-adjusted score, a grid-to-finish "
         "heatmap, reliability over time, a 3D globe of the circuits, the team-mate network and a final view that "
-        "explains how the data were checked. It is not a separate product. Its data file is generated by "
+        "explains how the data were checked, plus an assistant that answers questions about them (Section 6.1). "
+        "It is not a separate product. Its data file is generated by "
         "`build_web_data.py`, which reads only the outputs of the components, and `run_all.py` calls it as its last "
         "step, so the dashboard can never show numbers that the validation gates have not passed (Table 2). "
         "Appendix H shows every view.")
@@ -615,6 +636,47 @@ def dashboard_section(r: Report, F: dict, figs: dict) -> None:
          f"{F['issues']} issues, {F['gates']} gates, RDA {pct(F['rda_before'])} -> {pct(F['rda_after'])}"],
     ], columns=["Dashboard view", "Project output it reads", "What it shows"]),
         "Each dashboard view and the project output it is built from.", [4.4, 6.0, 6.0])
+    ask_section(r, F, figs)
+
+
+def ask_section(r: Report, F: dict, figs: dict) -> None:
+    card, route, llm = F["card"], F["ev_route"], F["ev_llm"]
+    tm, base = card["test_metrics"], card["baseline_test_metrics"]
+    r.heading("6.1 Ask the Data: a Grounded Assistant", 2, count_as="dashboard")
+    r.p("The last view lets users question the data in English or Spanish (Figure "
+        f"{figs['ask']}). It grows out of a prototype by Manohar Zalki (FastAPI, a local Llama 3 through Ollama, "
+        "hybrid vector and graph retrieval and a machine-learning engine), rebuilt so that the language model never "
+        "supplies a number. The service first finds the drivers, teams, circuits and seasons in the question, then "
+        "gathers evidence: exact figures computed with pandas from the cleaned tables, each carrying its file, "
+        "SHA-256, filter, row count and raw source line; team-mate chains from the graph; a podium-probability model; "
+        f"and the best of {F['kb_docs']:,} documents generated from the project outputs. Llama 3 answers from that "
+        "evidence only and cites it, and every figure in the answer is then looked up in the evidence. Official "
+        f"champions come from Wikidata ({F['champ_wikidata']} of {config.LAST_COMPLETE_SEASON - config.FIRST_SEASON + 1} "
+        "seasons) and are reconciled with our points: "
+        f"{' and '.join(map(str, F['champ_disagree']))} disagree because only a driver's best results counted, a "
+        "semantic trap that a plain sum of points gets wrong. The podium model uses only pre-race information, "
+        f"chooses among three learned models on {card['split']['validation'].split(' ')[0]} and is tested once on "
+        f"{card['split']['test'].split(' ')[0]}: its probabilities beat a grid-only baseline, but its top three "
+        "picks call no more podium places than the grid order (Table 3), which we report rather than hide.")
+    rows = [["Evidence contains the correct answer", f"{route['evidence_contains_expected']} of {route['questions']}",
+             f"median {route['median_evidence_seconds']:.2f} s"]]
+    if llm:
+        rows += [["Written answer contains the correct answer", f"{llm['answer_contains_expected']} of {llm['questions']}",
+                  "Llama 3 8B, local"],
+                 ["Answers whose figures are all found in the evidence",
+                  f"{llm['answers_with_all_figures_verified']} of {llm['questions']}",
+                  f"{llm['figures_verified']} of {llm['figures_total']} figures"],
+                 ["Answers citing their evidence", f"{llm['answers_citing_evidence']} of {llm['questions']}",
+                  f"median {llm['median_total_seconds']:.0f} s per answer on a laptop CPU"]]
+        if F["refused"] is not None:
+            rows.append(["Question outside 1950-2025 declined", "yes" if F["refused"] else "no", "2030 champion"])
+    rows += [["Podium model, test 2020-2025: log loss / ROC AUC",
+              f"{tm['log_loss']:.3f} / {tm['roc_auc']:.3f}", f"grid-only baseline {base['log_loss']:.3f} / {base['roc_auc']:.3f}"],
+             ["Podium places called by the top three picks", f"{100 * tm['podium_places_called']:.0f}%",
+              f"'front three finish on the podium' {100 * card['rule_front_three_podium_places_called_test']:.0f}%"]]
+    r.table(pd.DataFrame(rows, columns=["Check (25 benchmark questions, answers computed independently)",
+                                        "Result", "Detail"]),
+            "Evaluation of the assistant and of its podium model (outputs/assistant/).", [7.2, 3.0, 6.2])
 
 
 def integration(r: Report, F: dict) -> None:
@@ -622,7 +684,7 @@ def integration(r: Report, F: dict) -> None:
     r.p("The components were designed as one chain with explicit contracts: the issue register is the interface "
         "between B and C (every issue names the cleaning step that resolves it, and C measures every issue again "
         "after cleaning), the schema module is shared by C and A, and the graph and dashboard read only validated "
-        "output. Table 3 traces six findings through all components. The dependencies also ran backwards: the "
+        "output. Table 4 traces six findings through all components. The dependencies also ran backwards: the "
         "dashboard exposed issue B29, the graph analysis "
         "revealed that 'constructor' changes meaning over time, a semantic issue that profiling alone had not "
         "flagged and that now belongs in the metadata, and Component A's identifier lookup exposed broken links "
@@ -657,11 +719,13 @@ def conclusion(r: Report, F: dict) -> None:
         "flagged.")
     r.p("**Limitations.** The seven short races of 2014-2025 match documented absences but should be confirmed "
         "against official FIA classifications. The RDA scores are a self-assessment, F-UJI can only test what is "
-        "online, and the DOI is not minted yet. Title-casing needed manual exceptions, a few Wikidata links are "
+        "online, and the curated package's own DOI is not minted yet. Title-casing needed manual exceptions, a few "
+        "Wikidata links are "
         "broken, the team concept is ambiguous before the 1970s, and sprint races were left out. Finally, the "
         "CC BY-NC-SA 4.0 licence inherited from the source restricts reuse: the curated data may support research "
         "and teaching, but not, for example, a commercial betting model.")
-    r.p("**Recommendations.** We recommend publishing the package on Zenodo to obtain a DOI, publishing the status "
+    r.p("**Recommendations.** We recommend depositing the curated package on Zenodo as a record derived from the "
+        "raw archive's DOI, correcting that record's licence to CC BY-NC-SA 4.0, publishing the status "
         "vocabulary as SKOS, modelling 'team' separately from 'chassis', reporting the source defects (duplicated "
         "blocks, identifier case) upstream to Jolpica, and running the validation gates automatically whenever new "
         "race data arrive, so that quality is checked continuously rather than once.")
@@ -708,11 +772,13 @@ def appendix_a(r: Report) -> None:
                                  "status_in_package": "Status"}),
             "FAIR compliance gaps with evidence and actionable improvements.", [1.0, 2.4, 2.4, 3.8, 4.0, 2.8],
             font=7, label="A.1")
+    fuji_version = str(pd.read_csv(a / "fuji_summary.csv")["metric_version"].iloc[0])
     fuji = pd.read_csv(a / "fuji_summary.csv")[["resource", "url", "fair_percent", "F_percent", "A_percent",
                                                 "I_percent", "R_percent"]]
     r.table(fuji.rename(columns={"resource": "Resource", "url": "URL", "fair_percent": "FAIR %", "F_percent": "F %",
                                  "A_percent": "A %", "I_percent": "I %", "R_percent": "R %"}),
-            "F-UJI 4.0.1 results (metrics v0.5); raw JSON responses in outputs/component_a_fair/fuji/.",
+            f"F-UJI 4.0.1 results (metrics v{fuji_version}); raw JSON responses in outputs/component_a_fair/fuji/ "
+            "(an earlier run with metrics v0.5 is kept in fuji/metrics_v0.5/).",
             [3.0, 6.4, 1.4, 1.2, 1.2, 1.2, 1.2], font=7.5, label="A.2a")
     rda = pd.read_csv(a / "rda_fair_summary.csv")
     for col in ("as_obtained_rda_level", "curated_rda_level"):
@@ -748,7 +814,8 @@ def appendix_a(r: Report) -> None:
         rows.append([key, readable(value)])
     r.table(pd.DataFrame(rows, columns=["DataCite property", "Value"]),
             "Complete DataCite 4.5 metadata record of the curated dataset (JSON form; the equivalent XML validates "
-            "against the kernel-4.5 XSD). The DOI and creator names are placeholders until deposit.",
+            "against the kernel-4.5 XSD). The curated package's DOI and the ORCID iDs are placeholders until deposit; the "
+            "source archive's DOI (IsDerivedFrom) is real.",
             [3.2, 13.2], font=6.5, label="A.3")
     pid = pd.read_csv(a / "pid_coverage.csv")
     r.table(pid, "Wikidata QID coverage of entity identifiers.", [3.5, 3, 3, 3, 3.5], font=8, label="A.4")
@@ -884,6 +951,8 @@ def appendix_h(r: Report) -> None:
                                       "(issue B29) marked."),
         ("dashboard_circuits.png", "Circuits: rotating globe and ranking by Grands Prix hosted."),
         ("dashboard_network.png", "Team-mate network with the shortest chain from Juan Manuel Fangio to Max Verstappen."),
+        ("dashboard_ask.png", "Ask the data: the answer of the local Llama 3, its evidence with provenance and the "
+                              "figure check."),
         ("dashboard_data.png", "How the numbers were checked: the project pipeline and its key results."),
     ]
     for i, (file, caption) in enumerate(views, start=1):
@@ -899,6 +968,11 @@ def appendix_g(r: Report) -> None:
         "report builder); run the "
         "F-UJI tool locally and summarise its output; retrieve licence terms and Wikidata identifiers from primary "
         "sources; draft text for the report sections; and generate the figures.", count=False, size=9.5)
+    r.p("The ask-the-data assistant (Section 6.1) also contains an AI model as part of the product: Meta Llama 3 "
+        "(8B) and the nomic-embed-text embedding model, run locally through Ollama, so no data leave the computer. "
+        "By design the language model only phrases answers: every figure comes from code over the validated data "
+        "and is checked against the evidence after the answer is written, and its accuracy was measured on 25 "
+        "benchmark questions whose answers were computed independently.", count=False, size=9.5)
     r.p("Human responsibilities: choosing the dataset and the analysis direction, reviewing every cleaning "
         "decision and its domain justification, checking that numbers in the text match the outputs, and editing "
         "each component section and the reflection logs, which remain the work of the responsible student. All "
@@ -913,11 +987,12 @@ def build() -> dict:
     r = Report()
     title_page(r, F)
     figs = {"flow": 1, "fuji": 2, "rda": 3, "b1": 4, "b2": 5, "c1": 6, "g1": 7, "g3": 8, "g4": 9, "dash": 10,
-            "g2": "D.1"}
+            "ask": 11, "g2": "D.1"}
     introduction(r, F)
     component_a(r, F, figs)
     r.figure(config.FAIR_DIR / "fig_a2_fuji_scores.png",
-             "F-UJI automated FAIR scores for the three locations of the data (evidence: raw JSON in the ZIP).", 14.5)
+             f"F-UJI automated FAIR scores (metrics v{F['fuji_version']}) for the four locations of the data, including the "
+             "group's Zenodo record of the raw archive (evidence: raw JSON in the ZIP).", 14.5)
     r.figure(config.FAIR_DIR / "fig_a1_rda_fair_maturity.png",
              "RDA FAIR Data Maturity Model: progress per area for the data as obtained and the curated package.", 14.5)
     component_b(r, F, figs)
@@ -939,6 +1014,9 @@ def build() -> dict:
     r.figure(config.OUTPUT_DIR / "dashboard" / "fig_d1_dashboard_overview.png",
              "The interactive dashboard: start-light opening, constructor eras, the Fangio-to-Verstappen chain in the "
              "team-mate network, and the view that explains how the data were checked.", 16.4)
+    r.figure(config.OUTPUT_DIR / "dashboard" / "dashboard_ask.png",
+             "Ask the data: a question answered by the local Llama 3 from cited evidence (right), with the check "
+             "that every figure in the answer appears in the evidence.", 16.4)
     integration(r, F)
     conclusion(r, F)
     r.section_key = None

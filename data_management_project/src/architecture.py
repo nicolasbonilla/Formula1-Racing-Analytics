@@ -78,7 +78,7 @@ def draw(path) -> None:
         "clean")
     serve = [("FAIR record (A)", "DataCite, PROV-O\nschema.org", False),
              ("Property graph", f"NetworkX\n{n['edges']:,} edges", False),
-             ("Dashboard", "7 interactive\nviews", True),
+             ("Dashboard", "7 views + grounded\nLLM assistant", True),
              ("Report, slides", "generated\nfrom outputs", False)]
     sy = [0.79, 0.615, 0.44, 0.265]
     for y, (t, b, emph) in zip(sy, serve):
@@ -116,10 +116,82 @@ def draw(path) -> None:
     ps.save(fig, path)
 
 
+def draw_assistant(path) -> bool:
+    """Architecture of the ask-the-data assistant, with the measured results (replaces the prototype sketch)."""
+    import json
+    a = config.OUTPUT_DIR / "assistant"
+    needed = [a / "podium_model_card.json", a / "evaluation_evidence_summary.json", a / "knowledge_documents.jsonl"]
+    if not all(p.exists() for p in needed):
+        return False
+    card = json.loads(needed[0].read_text(encoding="utf-8"))
+    route = json.loads(needed[1].read_text(encoding="utf-8"))
+    llm_path = a / "evaluation_llm_summary.json"
+    llm = json.loads(llm_path.read_text(encoding="utf-8")) if llm_path.exists() else {}
+    docs = sum(1 for _ in open(needed[2], encoding="utf-8"))
+
+    fig, ax = plt.subplots(figsize=(7.6, 4.7))
+    fig.subplots_adjust(left=0.02, right=0.98, bottom=0.02, top=0.86)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    heads = [(0.0, "Users", "serve"), (0.205, "Service", "source"), (0.41, "Evidence (code, not the LLM)", "clean"),
+             (0.655, "Writing and checking", "quality"), (0.862, "Result", "serve")]
+    for x, label, zone in heads:
+        ax.text(x, 0.985, label, fontsize=8.4, fontweight="bold", va="top",
+                color=ZONE_COLORS[zone] if zone != "source" else ps.INK_SECONDARY)
+    w, h = 0.175, 0.135
+    box(ax, 0.0, 0.70, w, h, "Dashboard: Ask", "question in English\nor Spanish, streamed", "serve", emphasis=True)
+    box(ax, 0.0, 0.45, w, h, "Classic dashboard", "page RQ6 (prototype)\ncalls POST /chat", "serve")
+    box(ax, 0.205, 0.70, w, h, "FastAPI, port 8000", "/ask (stream), /chat,\n/health, /examples", "source")
+    box(ax, 0.205, 0.45, w, h, "Understand", "drivers, teams, circuits,\nseasons, intent", "source")
+    ev = [("Exact facts (pandas)", "data/cleaned: file,\nSHA-256, raw line"),
+          ("Team-mate graph", "NetworkX: chains,\nteam-mates, communities"),
+          ("Podium model", f"{card['selected_model'].replace('_', ' ')}, time split,\n"
+                           f"test ROC AUC {card['test_metrics']['roc_auc']:.3f}"),
+          ("Knowledge base", f"{docs:,} documents, BM25\n(+ vectors if computed)")]
+    ey = [0.775, 0.615, 0.455, 0.295]
+    for y, (t, b) in zip(ey, ev):
+        box(ax, 0.41, y, 0.205, h, t, b, "clean")
+    box(ax, 0.655, 0.70, 0.18, h, "Llama 3 8B, local", "Ollama; evidence only,\ncites [S1], [S2]", "quality")
+    box(ax, 0.655, 0.45, 0.18, h, "Figure check", "every number looked\nup in the evidence", "quality")
+    box(ax, 0.862, 0.575, 0.134, h, "Answer", "with cited evidence\nand provenance", "serve", emphasis=True)
+
+    arrow(ax, w, 0.70 + h / 2, 0.205, 0.70 + h / 2)
+    arrow(ax, w, 0.45 + h / 2, 0.205, 0.70 + 0.02, rad=0.15)
+    arrow(ax, 0.205 + w / 2, 0.70, 0.205 + w / 2, 0.45 + h)
+    for y in ey:
+        arrow(ax, 0.205 + w, 0.45 + h / 2, 0.41, y + h / 2)
+        arrow(ax, 0.615, y + h / 2, 0.655, 0.70 + h / 2)
+    arrow(ax, 0.655 + 0.09, 0.70, 0.655 + 0.09, 0.45 + h)
+    arrow(ax, 0.835, 0.45 + h / 2, 0.862, 0.575 + h / 2)
+
+    ax.add_patch(FancyBboxPatch((0.0, 0.02), 0.996, 0.205, boxstyle="round,pad=0,rounding_size=0.012",
+                                facecolor="#f4f3ef", edgecolor="none"))
+    ax.text(0.015, 0.21, f"Measured on {route['questions']} benchmark questions (answers computed independently "
+                         "from the cleaned CSV)", fontsize=8.0, fontweight="bold", va="top", color=ps.INK)
+    stats = [(f"{route['evidence_contains_expected']}/{route['questions']}", "evidence holds\nthe answer")]
+    if llm:
+        stats += [(f"{llm['answer_contains_expected']}/{llm['questions']}", "written answers\ncorrect"),
+                  (f"{llm['figures_verified']}/{llm['figures_total']}", "figures traced\nto evidence"),
+                  (f"{llm['median_total_seconds']:.0f} s", "median answer time\n(laptop CPU)")]
+    stats.append((f"{card['test_metrics']['log_loss']:.3f}", f"podium log loss vs\n{card['baseline_test_metrics']['log_loss']:.3f} grid only"))
+    for i, (num, lab) in enumerate(stats):
+        x = 0.015 + i * 0.198
+        ax.text(x, 0.15, num, fontsize=12, fontweight="bold", va="top", color=ps.CATEGORICAL[0])
+        ax.text(x, 0.085, lab, fontsize=6.9, va="top", color=ps.INK_SECONDARY, linespacing=1.2)
+    ps.titles(ax, "Ask the data: grounded answers, no invented numbers",
+              "The language model only phrases the evidence; every figure comes from code and is checked afterwards.")
+    ps.source_note(fig, "Idea and first prototype: Manohar Zalki (Graphic-LlmRag); results in outputs/assistant/.")
+    ps.save(fig, path)
+    return True
+
+
 def run() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     draw(OUT_DIR / "fig_e1_data_flow.png")
     print("[architecture] data-flow diagram written")
+    if draw_assistant(OUT_DIR / "fig_e2_assistant.png"):
+        print("[architecture] assistant diagram written")
 
 
 if __name__ == "__main__":

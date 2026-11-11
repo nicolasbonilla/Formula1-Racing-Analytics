@@ -30,7 +30,8 @@ Group: **Chirag Adhikari, Manohar Zalki, Nicolas Bonilla** (joint work on every 
 The graded project lives in [`data_management_project/`](data_management_project/): a reproducible
 pipeline that turns the Jolpica/Ergast archive into a quality-assessed, cleaned and FAIR-documented
 dataset of every World Championship result 1950-2025 (25,873 rows, 29 quality issues, 55 validation
-gates, 14 tests), plus a NetworkX team-mate graph and the interactive dashboard in [`dashboard/`](dashboard/).
+gates, 28 tests), plus a NetworkX team-mate graph, the interactive dashboard in [`dashboard/`](dashboard/)
+and a grounded question-answering assistant.
 
 | What | Where |
 |---|---|
@@ -40,6 +41,7 @@ gates, 14 tests), plus a NetworkX team-mate graph and the interactive dashboard 
 | Submission ZIP for the course portal | [`data_management_project/dist/`](data_management_project/dist/) |
 | Cleaned dataset and metadata (DataCite, schema.org, PROV-O) | [`data_management_project/data/cleaned/`](data_management_project/data/cleaned/), [`data_management_project/outputs/component_a_fair/`](data_management_project/outputs/component_a_fair/) |
 | Interactive dashboard (served zone of the pipeline) | [`dashboard/app.py`](dashboard/app.py), [`dashboard/static/`](dashboard/static/) |
+| Ask-the-data assistant (LLM + RAG + graph + podium model) | [`data_management_project/src/assistant/`](data_management_project/src/assistant/), section "Ask" of the dashboard |
 
 Reproduce everything on macOS / Linux (Python 3.11+; LibreOffice only for the PDF exports):
 
@@ -55,6 +57,14 @@ cd ../dashboard && streamlit run app.py        # http://localhost:8501
 `dashboard/static/index.html` also opens directly in a browser. The earlier multi-page Streamlit
 dashboard on the Spark gold layer (RQ1-RQ6) is kept as `dashboard/app_classic.py`
 (`cd dashboard && streamlit run app_classic.py`). Full details: [`data_management_project/README.md`](data_management_project/README.md).
+
+**Ask the data.** The dashboard's "Ask" section answers questions in English or Spanish with the local
+Llama 3, using only evidence computed from the validated data (each figure traced to its file and raw
+line, and checked after the answer is written). It grows out of Manohar's Graphic-LlmRag prototype
+(linked here as the `Graphic-LlmRag` submodule: `git clone --recursive ...`). For written answers install
+[Ollama](https://ollama.com) and run `ollama pull llama3 && ollama pull nomic-embed-text`; `streamlit run
+app.py` then starts the assistant service on port 8000 by itself, which also serves the RQ6 page of
+`app_classic.py`.
 
 ---
 

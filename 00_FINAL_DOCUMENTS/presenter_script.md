@@ -1,112 +1,125 @@
 # Presenter script - group presentation (10 minutes + 5 minutes Q&A)
 
-Speaking pace assumed: 130 words per minute. Time budget per slide below; rehearse once with a timer.
+Speaking pace assumed: 130 words per minute. Time budget per slide below; rehearse once with a timer. Present from the PDF, or install the fonts in report/assets/fonts before opening the PowerPoint.
 
 | # | Slide | Presenter | Budget | Words | Est. at pace |
 |---|---|---|---|---|---|
-| 1 | Title | All (opened by Student A) | 18 s | 52 | 24 s |
-| 2 | Dataset and motivation | Chirag Adhikari | 45 s | 103 | 48 s |
-| 3 | Pipeline overview | Nicolas Bonilla | 40 s | 97 | 45 s |
-| 4 | Data engineering architecture | Chirag Adhikari | 36 s | 72 | 33 s |
-| 5 | FAIR assessment | Chirag Adhikari | 45 s | 85 | 39 s |
-| 6 | FAIR gaps, licence and identifiers | Chirag Adhikari | 45 s | 102 | 47 s |
-| 7 | Hidden missingness | Manohar Zalki | 40 s | 84 | 39 s |
-| 8 | Duplicates vs shared drives | Manohar Zalki | 40 s | 94 | 43 s |
-| 9 | Eras, outliers and impact | Manohar Zalki | 45 s | 94 | 43 s |
-| 10 | Order of operations | Nicolas Bonilla | 45 s | 96 | 44 s |
-| 11 | Validation and resolution | Nicolas Bonilla | 45 s | 92 | 42 s |
-| 12 | Property graph and small world | Manohar Zalki | 42 s | 90 | 42 s |
-| 13 | Communities by era | Chirag Adhikari | 33 s | 87 | 40 s |
-| 14 | Interactive dashboard | Nicolas Bonilla | 29 s | 80 | 37 s |
-| 15 | Dashboard gallery | Manohar Zalki | 27 s | 56 | 26 s |
-| 16 | Conclusion | Nicolas Bonilla | 22 s | 89 | 41 s |
-| 17 | Questions | All | 3 s | 18 | 8 s |
+| 1 | Title | All (opened by Chirag Adhikari) | 18 s | 42 | 19 s |
+| 2 | Dataset and motivation | Chirag Adhikari | 36 s | 76 | 35 s |
+| 3 | CRISP-DM and medallion | Nicolas Bonilla | 36 s | 72 | 33 s |
+| 4 | Data engineering architecture | Nicolas Bonilla | 36 s | 78 | 36 s |
+| 5 | Spark medallion and star schema | Chirag Adhikari | 32 s | 76 | 35 s |
+| 6 | FAIR assessment | Chirag Adhikari | 41 s | 86 | 40 s |
+| 7 | Licences and identifiers | Chirag Adhikari | 41 s | 100 | 46 s |
+| 8 | Disguised nulls | Manohar Zalki | 36 s | 72 | 33 s |
+| 9 | Duplicates vs shared drives | Manohar Zalki | 36 s | 75 | 35 s |
+| 10 | Eras, outliers and impact | Manohar Zalki | 36 s | 75 | 35 s |
+| 11 | Order of operations | Nicolas Bonilla | 36 s | 72 | 33 s |
+| 12 | Validation and resolution | Nicolas Bonilla | 36 s | 65 | 30 s |
+| 13 | Property graph and small world | Manohar Zalki | 36 s | 72 | 33 s |
+| 14 | Communities by era | Chirag Adhikari | 32 s | 77 | 36 s |
+| 15 | Interactive dashboard | Nicolas Bonilla | 27 s | 64 | 30 s |
+| 16 | Dashboard gallery | Manohar Zalki | 23 s | 56 | 26 s |
+| 17 | Ask the data | Manohar Zalki | 36 s | 98 | 45 s |
+| 18 | Conclusion | Nicolas Bonilla | 23 s | 77 | 36 s |
+| 19 | Questions | All | 3 s | 18 | 8 s |
 
 **Total budget:** 10 min 00 s.
 
 | Presenter | Time budget |
 |---|---|
 | All | 0 min 21 s |
-| Chirag Adhikari | 3 min 24 s |
-| Nicolas Bonilla | 3 min 01 s |
-| Manohar Zalki | 3 min 14 s |
+| Chirag Adhikari | 3 min 02 s |
+| Nicolas Bonilla | 3 min 14 s |
+| Manohar Zalki | 3 min 23 s |
 
 ## Script per slide
 
-### Slide 1 - Title (All (opened by Student A), 18 s)
+### Slide 1 - Title (All (opened by Chirag Adhikari), 18 s)
 
-Good morning, we are Chirag Adhikari, Manohar Zalki and Nicolas Bonilla. We take 75 years of Formula 1 results from raw files to a FAIR, quality-assured dataset and a knowledge graph. I start with the dataset and FAIR, Manohar Zalki covers quality, Nicolas Bonilla the cleaning, and we close with the graph.
+Good morning, we are Chirag Adhikari, Manohar Zalki and Nicolas Bonilla. We take 75 years of Formula 1 results from raw files to a FAIR, quality-assured dataset, a knowledge graph, a dashboard and an assistant that answers questions with evidence. Lights out.
 
-### Slide 2 - Dataset and motivation (Chirag Adhikari, 45 s)
+### Slide 2 - Dataset and motivation (Chirag Adhikari, 36 s)
 
-Our dataset is the Ergast Formula 1 database, which the group downloaded from its successor, the Jolpica API. The core table has 25,907 race results: one row for every car in every championship Grand Prix since 1950, 1,149 races in total, linked to tables of races, circuits, drivers and constructors. We chose it for three reasons. It is relational, so joins and keys matter. Its quality problems are real: they come from 76 seasons of changing rules and from how the files were exported, not from planted errors. And drivers, teams and circuits form a natural network, which is ideal for graph modelling.
+Our dataset is the Ergast Formula 1 database, which the group downloaded from its successor, the Jolpica API. The core table has 25,907 race results: one row for every car in every championship Grand Prix since 1950, 1,149 races in total. We chose it because it is relational, so keys and joins matter; its quality problems are real, coming from decades of rule changes and file exports; and drivers, teams and circuits form a natural network.
 
-### Slide 3 - Pipeline overview (Nicolas Bonilla, 40 s)
+### Slide 3 - CRISP-DM and medallion (Nicolas Bonilla, 36 s)
 
-Everything you will see comes from one pipeline. Step zero only flattens the raw archive into CSV files and records checksums; it never changes a value. Component B profiles those files and writes an issue register with 29 entries. Component C resolves every issue and only publishes data that passes all 55 validation gates. Component A describes the clean package with standard metadata, and the graph is built from validated output only. A single command rebuilds every file in about a minute, and two independent runs give byte-identical results, so every number in our report is reproducible.
+We followed CRISP-DM inside a medallion layout. Bronze keeps the raw archive exactly as received, with lineage to the file and line. Silver is only written when every validation gate passes. Gold holds what people use: the FAIR record, the graph, the dashboard and the assistant. Each CRISP-DM phase has its own evidence, from the issue register to the tests and the assistant benchmark, and one command rebuilds everything with byte-identical results.
 
-### Slide 4 - Data engineering architecture (Chirag Adhikari, 36 s)
+### Slide 4 - Data engineering architecture (Nicolas Bonilla, 36 s)
 
-Here is the architecture behind it. Data move through zones: an immutable raw zone that keeps the source values and their lineage, a clean zone that is only written when every validation gate passes, and served products: the FAIR record, the graph, the dashboard and the report. Underneath are four engineering controls: one schema contract shared by cleaning and metadata, one orchestrated command, automated tests, and lineage down to the source line.
+Here is the architecture behind it. Data move through zones: an immutable raw zone that keeps the source values and their lineage, a clean zone that is only written when every validation gate passes, and served products. Two contracts hold it together: the issue register between profiling and cleaning, and one schema module shared by cleaning and metadata. Underneath are four controls: the schema as code, one orchestrated command, automated tests, and lineage down to the source line.
 
-### Slide 5 - FAIR assessment (Chirag Adhikari, 45 s)
+### Slide 5 - Spark medallion and star schema (Chirag Adhikari, 32 s)
 
-We measured FAIRness twice. First automatically with F-UJI, run on a local server against the three places where the data lives. The Jolpica API we downloaded from scores only 8 percent, our own GitHub repository 31 percent, and the Kaggle mirror 65 percent. Because F-UJI only sees what is online, we also scored all 41 indicators of the RDA maturity model with written evidence. Our curated package lifts maturity from 54 to 93 percent. Findable honestly stays at level zero until the DOI is minted.
+Next to the curated pipeline, the repository also contains the Spark implementation of the medallion idea. Every landing file is ingested into bronze, transformed in silver and modelled in gold as a star schema: one fact table of session results with race, constructor and driver dimensions. It runs in incremental batches and feeds the classic dashboard and the machine-learning prototype. Note that gold also holds sprint sessions, while the curated FAIR package covers Grands Prix only.
 
-### Slide 6 - FAIR gaps, licence and identifiers (Chirag Adhikari, 45 s)
+### Slide 6 - FAIR assessment (Chirag Adhikari, 41 s)
 
-We documented 7 concrete FAIR gaps, each with indicator, evidence and remedy. Two stand out. First, there is no persistent identifier: the data is only reachable through URLs that can change. Second, the licences contradict each other. Ergast allowed only non-commercial use and Jolpica licenses the data CC BY-NC-SA, yet the Kaggle mirror claims public domain and our own repository says MIT for everything. We fixed what we can: a clear licence split, a DataCite record that validates against the official schema, ISO country codes, provenance, and Wikidata identifiers for 98.7 percent of drivers. The DOI is reserved and minted on deposit.
+We measured FAIRness twice. First automatically with F-UJI, using the same metric version as the public service, on four locations of the data. The Jolpica API scores 11.5 percent and our GitHub repository 42.3. The same zip on Zenodo, deposited by our group with a DOI, scores 84.6 percent, the same total as the Kaggle mirror but far more findable. Because F-UJI only sees what is online, we also scored all 41 RDA indicators with written evidence: our package lifts maturity from 54 to 93 percent.
 
-### Slide 7 - Hidden missingness (Manohar Zalki, 40 s)
+### Slide 7 - Licences and identifiers (Chirag Adhikari, 41 s)
 
-I profiled every column of all five tables and ran 29 quality rules. The first lesson: completeness is deceptive. Only 18 cells are empty, so the table looks almost perfect. But 9,913 values only pretend to be data. The position column is filled for 9,646 drivers who retired, withdrew or were disqualified, and 267 cars start from grid slot zero, which does not exist. A model that predicts results from grid positions would learn from a retirement ranked eighteenth and from a fictitious pole-better-than-pole.
+Licences were the biggest gap. Ergast allowed only non-commercial use and Jolpica, where we downloaded the data, licenses it CC BY-NC-SA 4.0. Yet the Kaggle mirror claims public domain, our own repository says MIT for everything, and our Zenodo record says CC BY 4.0. Share-alike means the data must stay CC BY-NC-SA, so that is what our package declares, with MIT for code only, and the Zenodo licence will be corrected without changing the DOI. On identifiers: the raw archive has a DOI, 98.7 percent of drivers are linked to Wikidata, and the DataCite record validates against the official schema.
 
-### Slide 8 - Duplicates vs shared drives (Manohar Zalki, 40 s)
+### Slide 8 - Disguised nulls (Manohar Zalki, 36 s)
 
-Uniqueness needs domain knowledge. 23 rows of the 1960 United States Grand Prix were appended twice, and 11 rows of the 1960 Italian Grand Prix are copies whose season and round were blanked, so they only look like duplicates after the keys are restored. The red bar is the real problem. The blue bars are not: 172 rows share season, round and driver because in the 1950s a driver could take over a team-mate's car and be classified twice. A naive duplicate check would delete that history. The correct key includes the car number.
+I profiled every column of all five tables and ran 29 quality rules. The first lesson: completeness is deceptive. Only 18 cells are empty, so the table looks almost perfect. But 9,913 values only pretend to be data: the position column is filled for 9,646 drivers who did not finish, and 267 cars start from a grid slot zero that does not exist. A model would learn that a retirement is eighteenth.
 
-### Slide 9 - Eras, outliers and impact (Manohar Zalki, 45 s)
+### Slide 9 - Duplicates vs shared drives (Manohar Zalki, 36 s)
 
-Some issues are not errors at all, but they still break analyses. A race win was worth 8, 9, 10, 25 or even 50 points depending on the era, so raw points are not comparable over time. All 270 statistical outliers in laps are valid Indianapolis 500 results, so we flag them instead of deleting them. The root causes are export artefacts, undocumented source semantics and genuine historical change. For data science the impact is concrete: inflated win counts, biased prediction targets, sparse features from 136 free-text statuses, and train-test leakage through duplicated rows.
+Uniqueness needs domain knowledge. 23 rows of the 1960 United States Grand Prix were appended twice, and 11 rows of the 1960 Italian Grand Prix are copies whose season and round were blanked. The red bar is the real problem. The blue bars are not: 172 rows share season, round and driver because in the 1950s a driver could take over a team-mate's car and be classified twice. The correct key includes the car number.
 
-### Slide 10 - Order of operations (Nicolas Bonilla, 45 s)
+### Slide 10 - Eras, outliers and impact (Manohar Zalki, 36 s)
 
-The most important design decision was the order of operations. If you remove duplicates first and repair keys afterwards, 11 duplicates survive, because their season and round were blanked. So step C02 restores the missing season from the file name and the missing round by an exact lookup in the races table, and only then does step C03 remove all 34 copies. A unit test documents both orders. We also never invent values: no statistical imputation is used. Grid zero becomes missing with a flag, and withdrawn cars keep a missing number because none ever existed.
+Some issues are not errors at all, but they still break analyses. A race win was worth 8, 9, 10, 25 or even 50 points depending on the era, so raw points are not comparable over time. All 270 statistical outliers in laps are valid Indianapolis 500 results, so we flag them instead of deleting them. For data science the impact is concrete: inflated win counts, biased prediction targets and era bias in all-time rankings.
 
-### Slide 11 - Validation and resolution (Nicolas Bonilla, 45 s)
+### Slide 11 - Order of operations (Nicolas Bonilla, 36 s)
 
-Every one of the 29 issues is now closed: 18 are fixed, 3 are mitigated or flagged, 5 are kept and documented, and 3 were verified as non-errors. Our rule is flag, don't delete: Indianapolis 500 rows and shared drives stay in the data with flags. Status went from 136 free-text values to 8 groups. Every step writes an audit record, and 55 validation gates check schema, keys, foreign keys and vocabularies. If a single gate fails, nothing is published as clean. The final table has 25,873 rows and 35 documented columns.
+The most important design decision was the order of operations. If you remove duplicates first and repair keys afterwards, 11 duplicates survive, because their season and round were blanked. So step C02 restores the season from the file name and the round by an exact lookup in the races table, and only then does step C03 remove all 34 copies. A unit test documents both orders, and no value is ever invented.
 
-### Slide 12 - Property graph and small world (Manohar Zalki, 42 s)
+### Slide 12 - Validation and resolution (Nicolas Bonilla, 36 s)
 
-For the graph we modelled the cleaned data as a property graph: drivers, races, constructors, circuits and countries, with results stored as properties on RACED_IN edges, and a derived TEAMMATE_OF relationship. Indianapolis 500 rounds are excluded from the team-mate projection, a direct consequence of the quality analysis. The result is a small world: clustering is 0.41 against 0.014 for a random graph, yet two drivers are on average only 4.8 links apart. Juan Manuel Fangio reaches Max Verstappen in 8 steps, through long careers such as de Cesaris and Barrichello.
+Every one of the 29 issues is now closed: 18 are fixed, 3 are mitigated or flagged, 5 are kept and documented, and 3 were verified as non-errors. Our rule is flag, don't delete: Indianapolis 500 rows and shared drives stay, with flags. Status went from 136 free-text values to 8 groups, and 55 validation gates must all pass before anything is published as clean.
 
-### Slide 13 - Communities by era (Chirag Adhikari, 33 s)
+### Slide 13 - Property graph and small world (Manohar Zalki, 36 s)
 
-Louvain community detection finds 11 communities with a modularity of 0.70. The algorithm never sees a date, yet the large communities line up with eras, from the fifties around Stirling Moss and the sixties around Jack Brabham to the present grid around Sergio Pérez. Betweenness highlights bridges between eras such as Jo Bonnier and Andrea de Cesaris. One caveat links back to data quality: before the seventies the constructor field records the chassis make shared by private entrants, so early drivers look more connected than they were.
+We modelled the cleaned data as a property graph: drivers, races, constructors, circuits and countries, with results on the edges and a derived team-mate relationship. Indianapolis 500 rounds are excluded from the team-mate projection, a direct consequence of the quality analysis. The result is a small world: clustering is 0.41 against 0.014 for a random graph, yet two drivers are on average only 4.8 links apart. Fangio reaches Verstappen in 8 steps.
 
-### Slide 14 - Interactive dashboard (Nicolas Bonilla, 29 s)
+### Slide 14 - Communities by era (Chirag Adhikari, 32 s)
 
-Everything we showed ends here, in an interactive dashboard that the group can open with one command. It reads only validated outputs: the clean tables, the graph metrics, the issue register and the FAIR scores, and run_all rebuilds it as its last step. It also paid back: the reliability view showed mechanical failures vanishing after 2022, which turned out to be the source no longer recording why cars retired. That became issue B29. If time allows, we open it live.
+Louvain community detection finds 11 communities with a modularity of 0.70. The algorithm never sees a date, yet the large communities line up with eras, from the fifties around Stirling Moss to the present grid around Sergio Pérez. Betweenness highlights bridges between eras such as Jo Bonnier. One caveat links back to data quality: before the seventies the constructor field records the chassis make shared by private entrants, so early drivers look more connected than they were.
 
-### Slide 15 - Dashboard gallery (Manohar Zalki, 27 s)
+### Slide 15 - Interactive dashboard (Nicolas Bonilla, 27 s)
+
+Everything we showed ends here, in an interactive dashboard that opens with one command. It reads only validated outputs, and run_all rebuilds it as its last step. It also paid back: the reliability view showed mechanical failures vanishing after 2022, which turned out to be the source no longer recording why cars retired. That became issue B29. If time allows, we open it live.
+
+### Slide 16 - Dashboard gallery (Manohar Zalki, 23 s)
 
 Four more views. The timing tower ranks drivers by wins or by our era-adjusted score. The grid view shows where cars finish from each starting slot, using classified positions only, which is exactly the fix for issue B11. The reliability view marks the 2023 break that became issue B29, and the globe places all seventy-seven circuits.
 
-### Slide 16 - Conclusion (Nicolas Bonilla, 22 s)
+### Slide 17 - Ask the data (Manohar Zalki, 36 s)
 
-Four lessons. First, quality is contextual: outliers, duplicates and short grids were often valid history, so every automatic rule needed domain checking before deleting anything. Second, the order of operations matters, as the 11 hidden duplicates show. Third, the largest FAIR gaps were around the values: no identifier, conflicting licences and no provenance. Fourth, automating the evidence, with an audit log, validation gates, tests and generated metadata, turns cleaning into something an examiner can verify. Next steps are a Zenodo DOI and reporting the source defects upstream to Jolpica.
+The last view lets anyone question the data, in English or Spanish. It grows out of the LLM and RAG prototype from our group, rebuilt so that the language model never supplies a number. The question is parsed, the evidence is computed with pandas from the cleaned tables, with the file and raw line of every figure, plus the team-mate graph and a podium model. Llama 3 runs locally and only phrases that evidence, and every figure is checked afterwards. On 25 benchmark questions with independently computed answers, 25 were right, and it declined the question about 2030.
 
-### Slide 17 - Questions (All, 3 s)
+### Slide 18 - Conclusion (Nicolas Bonilla, 23 s)
+
+Five lessons. Quality is contextual: outliers, duplicates and short grids were often valid history. The order of operations matters, as the 11 hidden duplicates show. The largest FAIR gaps sit around the values: identifiers, licences and provenance. Automating the evidence turns cleaning into something an examiner can verify. And a language model needs a data layer: code computes, the model only phrases. Next steps are a DOI for the curated package and reporting the source defects upstream.
+
+### Slide 19 - Questions (All, 3 s)
 
 Thank you. We are happy to take your questions; each of us will answer on our own component.
 
 ## Hand-over cues
 
-- Slide 2 -> 3: Student A hands over to Student C for the pipeline overview.
-- Slide 3 -> 4: Student C hands back to Student A for the FAIR assessment.
-- Slide 5 -> 6: Student A hands over to Student B for data quality.
-- Slide 8 -> 9: Student B hands over to Student C for the cleaning pipeline.
-- Slide 10 -> 11: Student C hands over to Student B for the graph model.
-- Slide 11 -> 12: Student B hands over to Student A for communities.
-- Slide 12 -> 13: Student A hands over to Student C for the conclusion.
+- Slide 1 -> 2: All (opened by Chirag Adhikari) hands over to Chirag Adhikari for 'Dataset and motivation'.
+- Slide 2 -> 3: Chirag Adhikari hands over to Nicolas Bonilla for 'CRISP-DM and medallion'.
+- Slide 4 -> 5: Nicolas Bonilla hands over to Chirag Adhikari for 'Spark medallion and star schema'.
+- Slide 7 -> 8: Chirag Adhikari hands over to Manohar Zalki for 'Disguised nulls'.
+- Slide 10 -> 11: Manohar Zalki hands over to Nicolas Bonilla for 'Order of operations'.
+- Slide 12 -> 13: Nicolas Bonilla hands over to Manohar Zalki for 'Property graph and small world'.
+- Slide 13 -> 14: Manohar Zalki hands over to Chirag Adhikari for 'Communities by era'.
+- Slide 14 -> 15: Chirag Adhikari hands over to Nicolas Bonilla for 'Interactive dashboard'.
+- Slide 15 -> 16: Nicolas Bonilla hands over to Manohar Zalki for 'Dashboard gallery'.
+- Slide 17 -> 18: Manohar Zalki hands over to Nicolas Bonilla for 'Conclusion'.

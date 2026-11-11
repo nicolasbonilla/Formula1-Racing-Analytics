@@ -27,7 +27,11 @@
       "@id": "urn:f1-dm:entity/racing_f1_data.zip",
       "@type": "prov:Entity",
       "rdfs:label": "racing_f1_data.zip",
-      "prov:atLocation": "https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip",
+      "schema:identifier": "https://doi.org/10.5281/zenodo.23416916",
+      "prov:atLocation": [
+        "https://doi.org/10.5281/zenodo.23416916",
+        "https://github.com/zalkimanohar/Formula1-Racing-Analytics/blob/main/racing_f1_data.zip"
+      ],
       "schema:sha256": "81b027c4221901d92d30ad7b76eacf22668d299098e5c16dcb391c91fd39c748",
       "prov:wasDerivedFrom": {
         "@id": "https://api.jolpi.ca/ergast/f1/"

@@ -7,9 +7,14 @@ pipeline outputs (re-check after any re-run).
 
 1. **Why two assessment methods?** F-UJI is automated and reproducible but only sees machine-readable signals
    online; the RDA maturity model covers all 41 indicators, including licence and provenance documented for
-   humans. Together: GitHub 31%, Jolpica 8%, Kaggle 65% (F-UJI); 54% -> 93% maturity (RDA).
-2. **Why is Findable still level 0 after curation?** F1 (persistent identifier) is an essential indicator and
-   we have no DOI yet. A placeholder is not a PID; claiming it would be dishonest.
+   humans. Together (F-UJI 4.0.1, metrics v0.8, as on f-uji.net): Jolpica 11.5%, GitHub 42.3%, Kaggle 84.6%
+   and the group's Zenodo record of the raw archive 84.6%; 54% -> 93% maturity (RDA).
+2. **Why is Findable still level 0 after curation?** F1 (persistent identifier) is an essential indicator. The
+   raw archive has a DOI (10.5281/zenodo.23416916, byte-identical to our source, MD5 checked), but the curated
+   package does not have its own yet; we cite the raw DOI as IsDerivedFrom instead of borrowing it.
+2b. **Why not CC BY 4.0, as on the Zenodo record?** Jolpica's terms license the data CC BY-NC-SA 4.0; share-alike
+   forbids a more open licence for derived data. F-UJI gives the Zenodo record full marks for licence because it
+   only checks that one is present. The record's licence will be corrected (metadata edit, DOI unchanged).
 3. **Why DataCite and not Dublin Core?** DataCite is the schema required to mint a DOI (Zenodo uses it), it is
    richer for datasets (relatedIdentifiers, rights with SPDX, geoLocations). schema.org JSON-LD is added for
    search engines; Dublin Core terms map onto both.
@@ -80,7 +85,7 @@ pipeline outputs (re-check after any re-run).
    checksums, a clean zone (silver) written only when all 55 gates pass, and served products (gold): FAIR record,
    property graph, dashboard, report. Every arrow is code orchestrated by run_all.py.
 2. **What makes it reproducible?** One command from the pinned source archive (SHA-256), no network needed,
-   deterministic outputs (identical hashes on re-runs), 14 automated tests, configuration and vocabularies as code.
+   deterministic outputs (identical hashes on re-runs), 28 automated tests, configuration and vocabularies as code.
 3. **What is a data contract here?** The issue register (B to C: every issue names its fix and is re-measured) and
    the schema module (C validates against it, A documents from it).
 4. **How is the dashboard connected to the project?** build_web_data.py reads only validated outputs (clean
@@ -90,3 +95,29 @@ pipeline outputs (re-check after any re-run).
    went back into the quality register and is now documented and marked in the chart.
 6. **Why the era-adjusted score?** Points systems changed (8 to 50 points for a win); dividing by the race
    winner's points makes a win worth exactly 1 in any era (issue B15, step C09).
+
+## The ask-the-data assistant (whole group; idea and prototype by Manohar)
+
+1. **Why put a language model in a data-management project?** To show the served zone answering questions,
+   and to show how to do it safely: the model only phrases answers. Every number comes from pandas code over the
+   validated tables, carries its file, SHA-256, filter, row count and raw `source_file:source_line`, and every
+   figure in the answer is checked against that evidence afterwards (untraceable figures are flagged).
+2. **How do you stop it from hallucinating?** Three layers: the prompt allows only the evidence and asks for
+   citations; questions outside the data get an explicit coverage block (it declined "2030 champion"); and the
+   figure check. Without Ollama the assistant still returns the evidence, never an unchecked answer.
+3. **How good is it?** 25 benchmark questions with answers computed independently from the CSV (evaluate.py):
+   the evidence contained the answer in all 25; see outputs/assistant/evaluation_llm_summary.json for the written
+   answers, the figure check and the timing (laptop CPU, no GPU).
+4. **Why is 1988 Senna and not Prost, if Prost scored more points?** Until 1990 only a driver's best results
+   counted. The results table has points per race, not standings, so champions come from Wikidata and are
+   reconciled with our points: 1964 and 1988 are the only disagreements, and both are explained.
+5. **What changed from the original prototype?** The prototype's model scores were fixed numbers in the code,
+   three of its six models were never trained, the vector store was empty and the graph lookup searched the whole
+   question as a driver name. The rebuilt version computes every score, uses the cleaned data, and keeps the
+   prototype's `/chat` interface so its RQ6 page still works.
+6. **Is the podium model useful?** Its probabilities are better than the grid alone (lower log loss and Brier,
+   higher ROC AUC on 2020-2025, chosen on 2014-2019 only), but its top three picks find no more podium finishers
+   than the grid order. We report that instead of claiming accuracy it does not have.
+7. **Is it leaking the answer?** No: every form feature is computed from earlier races (shifted rolling windows),
+   and points, laps or finishing status of the race itself are never inputs; a test checks this.
+

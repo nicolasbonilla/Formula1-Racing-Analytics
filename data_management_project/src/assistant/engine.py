@@ -96,10 +96,13 @@ class Engine:
         if m and 1 <= int(m.group(1)) <= 40:
             p.issue = f"B{m.group(1)}"
         g = GRID_RE.search(folded)
-        if g and "predict" in intents:
-            p.grid = int(g.group(1) or g.group(2))
-            if not 1 <= p.grid <= 26:
-                p.grid = None
+        if "predict" in intents:
+            if g:
+                p.grid = int(g.group(1) or g.group(2))
+                if not 1 <= p.grid <= 26:
+                    p.grid = None
+            elif re.search(r"\b(pole|front of the grid|primera posicion|desde la pole)\b", folded):
+                p.grid = 1
         for e in p.entities:
             if e.alternatives:
                 p.notes.append(f"'{e.name}' assumed; also matches {', '.join(e.alternatives[:3])}")
@@ -271,7 +274,7 @@ class Engine:
             yield {"type": "check", **self.check(text, evidence, question)}
             yield {"type": "done", "seconds": round(time.perf_counter() - t0, 2), "mode": "evidence-only"}
             return
-        text, stats = "", {}
+        text, stats, mode = "", {}, "llm"
         try:
             for piece in llm.chat_stream(SYSTEM, self.prompt(question, evidence)):
                 if piece.get("done"):
@@ -280,10 +283,10 @@ class Engine:
                     text += piece["text"]
                     yield {"type": "token", "text": piece["text"]}
         except (OSError, RuntimeError) as exc:
-            text = self.summary(evidence)
-            yield {"type": "answer", "text": text, "mode": "evidence-only", "reason": f"language model error: {exc}"}
+            text, mode = self.summary(evidence), "evidence-only"
+            yield {"type": "answer", "text": text, "mode": mode, "reason": f"language model error: {exc}"}
         yield {"type": "check", **self.check(text, evidence, question)}
-        yield {"type": "done", "seconds": round(time.perf_counter() - t0, 2), "mode": "llm", "stats": stats}
+        yield {"type": "done", "seconds": round(time.perf_counter() - t0, 2), "mode": mode, "stats": stats}
 
     def ask(self, question: str, use_llm: bool = True) -> dict:
         """Non-streaming helper: the whole result as one dict."""

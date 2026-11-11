@@ -4,6 +4,10 @@ F-UJI must be running locally (python -m fuji_server -c fuji_server/config/serve
 README). When the service is reachable every resource is re-evaluated and the raw JSON response
 is stored under outputs/component_a_fair/fuji/. When it is not reachable, the stored responses
 are summarised again, so the pipeline stays reproducible offline.
+
+Metric version 0.8 is the one the public F-UJI service uses (and the one of the group's earlier web run on the
+Zenodo record, MetaData-FAIR/ in the repository root), so all four locations are scored on the same scale.
+A first run with metrics v0.5 (9 Nov 2026) is kept for reference in fuji/metrics_v0.5/.
 """
 from __future__ import annotations
 
@@ -21,7 +25,7 @@ from src import config
 FUJI_URL = os.environ.get("FUJI_URL", "http://localhost:1071/fuji/api/v1/evaluate")
 FUJI_USER = os.environ.get("FUJI_USER", "marvel")
 FUJI_PASSWORD = os.environ.get("FUJI_PASSWORD", "wonderwoman")
-METRIC_VERSION = "metrics_v0.5"
+METRIC_VERSION = "metrics_v0.8"
 
 TARGETS = {
     "github_repository": {
@@ -35,6 +39,11 @@ TARGETS = {
     "kaggle_ergast_mirror": {
         "url": "https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020",
         "role": "Most-used public mirror of the Ergast database (approved source type)",
+    },
+    "zenodo_raw_archive": {
+        "url": "https://doi.org/10.5281/zenodo.23416916",
+        "role": "The group's raw archive racing_f1_data.zip deposited on Zenodo (DOI, 16 Oct 2026; "
+                "byte-identical to data/source, checksum verified)",
     },
 }
 
