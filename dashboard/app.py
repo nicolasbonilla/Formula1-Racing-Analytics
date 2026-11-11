@@ -1,4 +1,3 @@
-
 import streamlit as st
 from theme import set_theme
 from utils import load_table
@@ -40,10 +39,8 @@ def load_all_data():
 
 data = load_all_data()
 
-# [Rest of your app.py remains the same...]
-
 # ---------------------------------------------------------
-# 3. GLOBAL FILTERS (ONLY SEASON + SLIDERS)
+# 3. GLOBAL FILTERS (STORED IN SESSION STATE)
 # ---------------------------------------------------------
 st.sidebar.title("🔍 Filters")
 
@@ -57,34 +54,44 @@ if "season" not in races.columns:
     st.error("❌ Races table missing 'season' column — check Gold layer.")
     st.stop()
 
-# Remove 2026 from options
+# Remove 2026/2027 outliers from options if needed
 season_list = sorted([s for s in races["season"].dropna().unique() if s != 2027])
 
 # Default seasons
 default_seasons = [s for s in [2024, 2025, 2026] if s in season_list]
 
-seasons = st.sidebar.multiselect(
+st.session_state["selected_seasons"] = st.sidebar.multiselect(
     "Season",
     season_list,
     default=default_seasons
 )
 
 # Sliders
-grid_min, grid_max = st.sidebar.slider("Grid Position", 1, 20, (1, 20))
-final_min, final_max = st.sidebar.slider("Final Position", 1, 20, (1, 20))
-points_min, points_max = st.sidebar.slider("Points", 0, 30, (0, 30))
+st.session_state["grid_range"] = st.sidebar.slider("Grid Position", 1, 20, (1, 20))
+st.session_state["pos_range"] = st.sidebar.slider("Final Position", 1, 20, (1, 20))
+st.session_state["points_range"] = st.sidebar.slider("Points", 0, 30, (0, 30))
 
 # ---------------------------------------------------------
-# 4. APPLY FILTERS
+# 4. APPLY GLOBAL FILTERS
 # ---------------------------------------------------------
 filtered_results = results.copy()
 
-# Apply numeric position and points sliders directly on results
-filtered_results = filtered_results[
-    (filtered_results["grid_position"].between(grid_min, grid_max)) &
-    (filtered_results["final_position"].between(final_min, final_max)) &
-    (filtered_results["points"].between(points_min, points_max))
-]
+if st.session_state["selected_seasons"] and "season" in filtered_results.columns:
+    filtered_results = filtered_results[filtered_results["season"].isin(st.session_state["selected_seasons"])]
+
+g_min, g_max = st.session_state["grid_range"]
+p_min, p_max = st.session_state["pos_range"]
+pts_min, pts_max = st.session_state["points_range"]
+
+grid_col = "grid_position" if "grid_position" in filtered_results.columns else "grid"
+final_col = "final_position" if "final_position" in filtered_results.columns else "position"
+
+if grid_col in filtered_results.columns:
+    filtered_results = filtered_results[filtered_results[grid_col].between(g_min, g_max)]
+if final_col in filtered_results.columns:
+    filtered_results = filtered_results[filtered_results[final_col].between(p_min, p_max)]
+if "points" in filtered_results.columns:
+    filtered_results = filtered_results[filtered_results["points"].between(pts_min, pts_max)]
 
 # ---------------------------------------------------------
 # 5. SIDEBAR NAVIGATION
@@ -103,7 +110,7 @@ page = st.sidebar.radio(
 )
 
 # ---------------------------------------------------------
-# 6. ROUTE TO SELECTED PAGE
+# 6. ROUTE TO SELECTED PAGE WITH FILTERED DATA
 # ---------------------------------------------------------
 filtered_data = {
     **data,
@@ -121,28 +128,39 @@ elif page == "RQ2 — Race Outcome Analytics":
 
 elif page == "RQ3 — Circuit Geography":
     try:
-        res_df = filtered_data["results"]
-        races_df = data["races"]
-        circuits_df = data["circuits"]
-        
-        # Merge results with races to attach 'season' and 'circuit_id'
-        rq3_df = res_df.merge(races_df, on="race_id" if "race_id" in res_df.columns else ["season", "round"], how="inner")
-        
-        # Merge with circuits to get country details
-        if "circuit_id" in rq3_df.columns and "circuit_id" in circuits_df.columns:
-            rq3_df = rq3_df.merge(circuits_df, on="circuit_id", how="left")
+        res_df = filtered_data["results"].copy()
+        races_df = data["races"].copy()
+
+        # Direct, robust join with dim_races on season and round (per schema design)
+        if not races_df.empty and "season" in res_df.columns and "round" in res_df.columns:
+            races_subset = races_df.drop_duplicates(subset=["season", "round"])
             
-        # Standardize country column name
-        if "country" in rq3_df.columns and "circuit_country" not in rq3_df.columns:
-            rq3_df["circuit_country"] = rq3_df["country"]
-        elif "location_country" in rq3_df.columns and "circuit_country" not in rq3_df.columns:
-            rq3_df["circuit_country"] = rq3_df["location_country"]
+            # Drop conflicting columns if they exist in results before merging
+            cols_to_drop = [c for c in ["circuit_name", "locality", "country", "race_name", "race_date"] if c in res_df.columns]
+            if cols_to_drop:
+                res_df = res_df.drop(columns=cols_to_drop)
 
-        # Apply season filter AFTER the merge if seasons are selected
-        if len(seasons) > 0 and "season" in rq3_df.columns:
-            rq3_df = rq3_df[rq3_df["season"].isin(seasons)]
+            res_df = res_df.merge(
+                races_subset,
+                on=["season", "round"],
+                how="left"
+            )
 
-        render_rq3(rq3_df)
+        # Standardize column aliases expected by RQ3 section
+        if "country" in res_df.columns:
+            res_df["circuit_country"] = res_df["country"].fillna("International")
+        else:
+            res_df["circuit_country"] = "International"
+
+        if "circuit_name" not in res_df.columns:
+            if "race_name" in res_df.columns:
+                res_df["circuit_name"] = res_df["race_name"]
+            else:
+                res_df["circuit_name"] = "Grand Prix Circuit"
+        else:
+            res_df["circuit_name"] = res_df["circuit_name"].fillna("Grand Prix Circuit")
+
+        render_rq3(res_df)
     except Exception as e:
         st.error(f"Error loading RQ3 Circuit Geography data: {e}")
 
@@ -154,6 +172,7 @@ elif page == "RQ5 — Cross‑Dataset Insights":
 
 elif page == "RQ6: Graphic-LLM-RAG & ML Engine":
     rq6_graphic_llm_rag.render()
+
 # ---------------------------------------------------------
 # 7. FOOTER
 # ---------------------------------------------------------
