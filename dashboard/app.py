@@ -38,4 +38,8 @@ st.set_page_config(page_title="Formula 1 in Numbers, 1950-2025", page_icon=":mat
                    layout="wide", initial_sidebar_state="collapsed")
 st.markdown(FULL_SCREEN, unsafe_allow_html=True)
 latest_change = max(p.stat().st_mtime for p in STATIC.rglob("*") if p.is_file())
-components.html(bundled_page(latest_change), height=900, scrolling=True)
+page = bundled_page(latest_change)  # our own static files only, never user input
+if hasattr(st, "iframe"):  # newer Streamlit, where components.html is deprecated
+    st.iframe(page, height=900)
+else:
+    components.html(page, height=900, scrolling=True)
