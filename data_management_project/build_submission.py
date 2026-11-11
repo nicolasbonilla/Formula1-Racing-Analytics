@@ -22,12 +22,12 @@ ZIP_PATH = DIST / "F1_DataManagement_Group_Submission.zip"
 
 INCLUDE = [
     "README.md", "requirements.txt", "run_all.py", "build_submission.py",
-    "src/*.py", "tests/*.py",
+    "src/*.py", "src/assistant/*.py", "tests/*.py",
     "data/source/*", "data/raw/*", "data/cleaned/*", "data/reference/**/*",
     "outputs/**/*",
     "report/*.docx", "report/*.pdf", "report/presentation/*",
 ]
-EXCLUDE = re.compile(r"(__pycache__|\.pytest_cache|\.pyc$|~\$)")
+EXCLUDE = re.compile(r"(__pycache__|\.pytest_cache|\.pyc$|~\$|api\.log$|\.lo_profile)")
 DASHBOARD_INCLUDE = ["app.py", "build_web_data.py", "static/*", "static/vendor/*"]
 
 

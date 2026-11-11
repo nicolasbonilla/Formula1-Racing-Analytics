@@ -47,7 +47,7 @@
     </a>
     <nav aria-label="Chapters">
       <a href="#eras">Eras</a><a href="#drivers">Drivers</a><a href="#grid">The grid</a><a href="#reliability">Reliability</a>
-      <a href="#circuits">Circuits</a><a href="#teammates">Team-mates</a><a href="#data">The data</a>
+      <a href="#circuits">Circuits</a><a href="#teammates">Team-mates</a><a href="#ask">Ask</a><a href="#data">The data</a>
     </nav>
     <div class="range" role="group" aria-label="Seasons shown">
       <span class="range-label">Seasons</span>
@@ -182,6 +182,40 @@
     <p class="finding" id="net-finding"></p>
   </section>
 
+  <section class="chapter" id="ask" aria-labelledby="ask-title">
+    <div class="chapter-head">
+      <h2 id="ask-title">Ask the data</h2>
+      <div>
+        <p class="lede">Ask about any driver, team, circuit or season, in English or Spanish. Llama 3 writes the answer on this computer, but it may only use the evidence beside it: exact figures computed from the cleaned dataset, the team-mate network and our podium model, each traced to its file and raw line. Every number in the answer is then checked against that evidence.</p>
+        <p class="scope ask-status" id="ask-status" aria-live="polite"><i></i><span>Connecting to the assistant</span></p>
+      </div>
+    </div>
+    <ol class="ask-steps" aria-label="How an answer is built">
+      <li><b>Understand</b><span>Finds drivers, teams, circuits and seasons in the question</span></li>
+      <li><b>Gather evidence</b><span>Exact figures, team-mate chains, model estimates, documents</span></li>
+      <li><b>Write</b><span>Llama 3 answers from the evidence only and cites it</span></li>
+      <li><b>Check</b><span>Every figure in the answer is looked up in the evidence</span></li>
+    </ol>
+    <div class="ask-layout">
+      <div class="panel ask-panel">
+        <form class="ask-form" id="ask-form">
+          <label class="sr-only" for="ask-input">Your question</label>
+          <textarea id="ask-input" rows="2" maxlength="500" placeholder="Who won the 1988 World Championship, and who scored more points?"></textarea>
+          <button class="btn primary" type="submit" id="ask-btn">Ask</button>
+        </form>
+        <div class="ask-examples" id="ask-examples" role="group" aria-label="Example questions"></div>
+        <div class="ask-answer" id="ask-answer" aria-live="polite">
+          <p class="ask-empty">Pick an example or type your own question. The evidence appears first, in under a second; the written answer follows.</p>
+        </div>
+        <div class="ask-check" id="ask-check" hidden></div>
+      </div>
+      <aside class="ask-evidence" aria-label="Evidence used for the answer">
+        <p class="sub">Evidence</p>
+        <ol class="evidence-list" id="ask-evidence"><li class="ev-empty">Nothing yet.</li></ol>
+      </aside>
+    </div>
+  </section>
+
   <section class="chapter" id="data" aria-labelledby="data-title">
     <div class="chapter-head">
       <h2 id="data-title">How the numbers were checked</h2>
@@ -236,6 +270,7 @@
     <div>
       <h2>Rebuild it</h2>
       <p>Everything here is generated from the cleaned dataset in <code>data_management_project</code>. Run <code>python run_all.py</code>, then <code>python dashboard/build_web_data.py</code>.</p>
+      <p>The assistant runs locally: <code>python -m src.assistant.api</code> inside <code>data_management_project</code>, with Ollama and <code>ollama pull llama3</code>. Its idea and first prototype come from Manohar Zalki's Graphic-LlmRag.</p>
     </div>
   </div>
 </footer>
@@ -248,5 +283,6 @@
 <script src="vendor/world.js"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script src="assistant.js"></script>
 </body>
 </html>

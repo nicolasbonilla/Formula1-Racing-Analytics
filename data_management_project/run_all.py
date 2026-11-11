@@ -25,6 +25,10 @@ def clean_generated() -> None:
     for folder in (config.RAW_DIR, config.CLEAN_DIR, config.QUALITY_DIR, config.CLEANING_DIR, config.GRAPH_DIR,
                    config.OUTPUT_DIR / "architecture"):
         shutil.rmtree(folder, ignore_errors=True)
+    # the language-model evaluation is slow to repeat (stored evidence, like the F-UJI responses): keep it
+    for item in (config.OUTPUT_DIR / "assistant").glob("*"):
+        if item.is_file() and not item.name.startswith(("evaluation_llm", "api.log")):
+            item.unlink()
     for item in config.FAIR_DIR.glob("*"):
         if item.name in KEEP_IN_FAIR_DIR:
             continue
@@ -57,6 +61,7 @@ def main() -> int:
 
     from src import (architecture, build_raw_dataset, cleaning, fair_assessment, graph_model, metadata,
                      pid_enrichment, profiling, quality_charts, run_fuji_assessment)
+    from src.assistant import evaluate, knowledge, podium_model, reference
 
     steps = [
         ("Step 0   extract raw CSVs from the source archive", build_raw_dataset.run),
@@ -68,6 +73,11 @@ def main() -> int:
         ("Comp. A  F-UJI evidence summary (stored responses)", lambda: run_fuji_assessment.run(live=False)),
         ("Comp. A  RDA FAIR maturity assessment and gaps", fair_assessment.run),
         ("Comp. A  DataCite / schema.org / Data Package metadata", metadata.run),
+        ("Assistant official World Champions (cached Wikidata, reconciled with points)",
+         reference.build_official_champions),
+        ("Assistant podium model (time-based validation, model card)", podium_model.train),
+        ("Assistant knowledge documents for retrieval", knowledge.run),
+        ("Assistant routing benchmark (25 questions, evidence only)", lambda: evaluate.run(use_llm=False)),
         ("Dashboard web data from the validated outputs (../dashboard)", build_dashboard_data),
         ("Architecture: end-to-end data-flow diagram", architecture.run),
     ]
