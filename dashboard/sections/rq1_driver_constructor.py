@@ -9,8 +9,18 @@ def render_rq1(df):
     # VALIDATION
     # ---------------------------------------------------------
     if df.empty:
-        st.error("❌ Missing fact_session_results table. Run Gold pipeline first.")
+        st.warning("⚠️ No records match your current filter settings. Please broaden your slider or season selections.")
         return
+
+    # Ensure driver_name / constructor_name exist
+    if "driver_name" not in df.columns:
+        if "family_name" in df.columns:
+            df["driver_name"] = df.get("given_name", "") + " " + df["family_name"]
+        else:
+            df["driver_name"] = "Driver " + df.get("driver_id", pd.Series([1]*len(df))).astype(str)
+
+    if "constructor_name" not in df.columns:
+        df["constructor_name"] = "Constructor " + df.get("constructor_id", pd.Series([1]*len(df))).astype(str)
 
     # ---------------------------------------------------------
     # DRIVER PERFORMANCE — TOTAL POINTS
@@ -32,6 +42,7 @@ def render_rq1(df):
         color="points",
         color_continuous_scale="Reds",
     )
+    fig.update_layout(template="plotly_dark", xaxis_tickangle=-45)
     st.plotly_chart(fig, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -55,6 +66,7 @@ def render_rq1(df):
         color="avg_points",
         color_continuous_scale="Oranges",
     )
+    fig2.update_layout(template="plotly_dark", xaxis_tickangle=-45)
     st.plotly_chart(fig2, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -77,6 +89,7 @@ def render_rq1(df):
         color="points",
         color_continuous_scale="Blues",
     )
+    fig3.update_layout(template="plotly_dark", xaxis_tickangle=-45)
     st.plotly_chart(fig3, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -99,6 +112,7 @@ def render_rq1(df):
         title="Driver–Constructor Points Matrix",
         color_continuous_scale="Viridis",
     )
+    fig4.update_layout(template="plotly_dark", xaxis_tickangle=-45)
     st.plotly_chart(fig4, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -121,6 +135,7 @@ def render_rq1(df):
             title="Driver Points Trend Across Seasons",
             markers=True,
         )
+        fig5.update_layout(template="plotly_dark")
         st.plotly_chart(fig5, use_container_width=True)
 
     st.success("RQ1 analysis loaded successfully.")

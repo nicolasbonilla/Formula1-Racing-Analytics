@@ -46,8 +46,8 @@ def render():
             with m_col4:
                 st.metric("Model Score", f"{model_score:.4f}" if isinstance(model_score, float) else str(model_score))
 
-            # 2. Display Context Summary in Expander
-            context_summary = res_data.get("context_summary", "")
+            # 2. Display Context Summary in Expander (Fixed key mapping from 'retrieved_context')
+            context_summary = res_data.get("retrieved_context", res_data.get("context_summary", ""))
             if context_summary:
                 with st.expander("🔍 View Retrieved Hybrid (Vector + Graph) Context", expanded=False):
                     st.code(context_summary, language="markdown")
@@ -61,7 +61,6 @@ def render():
             else:
                 st.json(res_data)
         else:
-            # Fallback for plain string responses
             st.markdown(str(res_data))
 
     # ---------------------------------------------------------
@@ -80,12 +79,10 @@ def render():
 
     # User Query Input
     if prompt := st.chat_input("Ask an F1 question (e.g., Show all race results for Max Verstappen in 2024)..."):
-        # Append and render user query
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Process with Assistant / Backend
         with st.chat_message("assistant"):
             with st.spinner("Querying Graph Engine & Local LLM..."):
                 payload = {
@@ -94,11 +91,12 @@ def render():
                 }
                 
                 try:
+                    # Increased timeout to 180s to prevent request drops during model training
                     response = requests.post(
                         f"{API_URL}/chat",
                         json=payload,
                         headers={"Content-Type": "application/json"},
-                        timeout=30
+                        timeout=180
                     )
                     if response.status_code == 200:
                         res_data = response.json()

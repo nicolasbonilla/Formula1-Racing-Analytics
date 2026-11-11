@@ -1,24 +1,24 @@
 WARNING: Using incubator modules: jdk.incubator.vector
 Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
-26/11/09 15:35:14 WARN Utils: Your hostname, Manohars-MacBook-Air.local, resolves to a loopback address: 127.0.0.1; using 172.16.108.73 instead (on interface en0)
-26/11/09 15:35:14 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+26/11/11 13:56:15 WARN Utils: Your hostname, Manohars-MacBook-Air.local, resolves to a loopback address: 127.0.0.1; using 172.16.108.73 instead (on interface en0)
+26/11/11 13:56:15 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
 Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
-26/11/09 15:35:14 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-26/11/09 15:35:16 WARN SparkSession: Using an existing Spark session; only runtime SQL configurations will take effect.
-[INFO] WORKSPACE = /Users/manoharazalki/F1-Analytics
+26/11/11 13:56:15 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+26/11/11 13:56:17 WARN SparkSession: Using an existing Spark session; only runtime SQL configurations will take effect.
+[INFO] WORKSPACE = /Users/manoharazalki/Formula1-Racing-Analytics
 [INFO] BATCH_ID  = 2026-02
-[INFO] gold_helpers WORKSPACE = /Users/manoharazalki/F1-Analytics
+[INFO] gold_helpers WORKSPACE = /Users/manoharazalki/Formula1-Racing-Analytics
 [INFO] gold_helpers BATCH_ID  = 2026-02
-[INFO] Silver races:    /Users/manoharazalki/F1-Analytics/data/silver/races/races.parquet
-[INFO] Silver circuits: /Users/manoharazalki/F1-Analytics/data/silver/circuits/circuits.parquet
-[INFO] Gold output:     /Users/manoharazalki/F1-Analytics/data/gold/dim_races/dim_races.parquet
+[INFO] Silver races:    /Users/manoharazalki/Formula1-Racing-Analytics/data/silver/races/races.parquet
+[INFO] Silver circuits: /Users/manoharazalki/Formula1-Racing-Analytics/data/silver/circuits/circuits.parquet
+[INFO] Gold output:     /Users/manoharazalki/Formula1-Racing-Analytics/data/gold/dim_races/dim_races.parquet
 [INFO] ✔ Silver races read
 [INFO] ✔ Silver circuits read
-[INFO] Existing Gold table found → merging: /Users/manoharazalki/F1-Analytics/data/gold/dim_races/dim_races.parquet
-[INFO] Gold table written: /Users/manoharazalki/F1-Analytics/data/gold/dim_races/dim_races.parquet
-[INFO] ✔ dim_races written to: /Users/manoharazalki/F1-Analytics/data/gold/dim_races/dim_races.parquet
+[INFO] Existing Gold table found → merging: /Users/manoharazalki/Formula1-Racing-Analytics/data/gold/dim_races/dim_races.parquet
+[INFO] Gold table written: /Users/manoharazalki/Formula1-Racing-Analytics/data/gold/dim_races/dim_races.parquet
+[INFO] ✔ dim_races written to: /Users/manoharazalki/Formula1-Racing-Analytics/data/gold/dim_races/dim_races.parquet
 +------+-----+------------------+----------+------------+----------------------------+------------+-----------+--------+--------------------------+--------------------------+
 |season|round|race_name         |race_date |circuit_id  |circuit_name                |locality    |country    |batch_id|created_timestamp         |updated_timestamp         |
 +------+-----+------------------+----------+------------+----------------------------+------------+-----------+--------+--------------------------+--------------------------+

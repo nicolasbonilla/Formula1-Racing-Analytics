@@ -5,25 +5,49 @@ import pandas as pd
 def render_rq5(data):
     st.title("🔗 RQ5 — Cross‑Dataset Insights")
 
-    # GOLD table
-    results = data["results"].copy()      # fact_session_results (already fully denormalized)
+    results = data["results"].copy()
+    races = data.get("races", pd.DataFrame()).copy()
+    circuits = data.get("circuits", pd.DataFrame()).copy()
 
-    # ---------------------------------------------------------
-    # VALIDATION
-    # ---------------------------------------------------------
     if results.empty:
-        st.error("❌ Missing fact_session_results table. Run Gold pipeline first.")
+        st.warning("⚠️ No records match your current filter settings. Broaden your sidebar filters.")
         return
 
     df = results.copy()
 
-    # ---------------------------------------------------------
-    # PERFORMANCE INDEX (Weighted)
-    # ---------------------------------------------------------
+    # Merge circuit names across multi-season records via races (season + round)
+    if not races.empty and "season" in df.columns and "round" in df.columns and "season" in races.columns and "round" in races.columns:
+        races_subset = races.copy()
+        for name_col in ["circuit_name", "name", "circuitRef", "race_name"]:
+            if name_col in races_subset.columns:
+                races_subset["circuit_name"] = races_subset[name_col]
+                break
+        df = df.merge(
+            races_subset[["season", "round", "circuit_name" if "circuit_name" in races_subset.columns else "round"]].drop_duplicates(subset=["season", "round"]),
+            on=["season", "round"],
+            how="left",
+            suffixes=("", "_races")
+        )
+        if "circuit_name_races" in df.columns:
+            df["circuit_name"] = df["circuit_name"].fillna(df["circuit_name_races"])
+
+    if "circuit_name" in df.columns:
+        df["circuit_name"] = df["circuit_name"].fillna("Grand Prix Circuit")
+    else:
+        df["circuit_name"] = "Grand Prix Circuit"
+
+    if "driver_name" not in df.columns:
+        df["driver_name"] = "Driver " + df.get("driver_id", pd.Series([1]*len(df))).astype(str)
+
+    if "constructor_name" not in df.columns:
+        df["constructor_name"] = "Constructor " + df.get("constructor_id", pd.Series([1]*len(df))).astype(str)
+
+    # 1. Weighted Performance Index
     st.subheader("🔥 Weighted Performance Index (Race + Sprint)")
 
-    df["is_win"] = (df["final_position"] == 1).astype(int)
-    df["is_podium"] = (df["final_position"] <= 3).astype(int)
+    final_col = "final_position" if "final_position" in df.columns else "position"
+    df["is_win"] = (df[final_col] == 1).astype(int)
+    df["is_podium"] = (df[final_col] <= 3).astype(int)
 
     df["performance_index"] = (
         df["points"]
@@ -46,16 +70,20 @@ def render_rq5(data):
         color="performance_index",
         color_continuous_scale="Teal",
     )
+    fig.update_layout(template="plotly_dark", xaxis_tickangle=-45)
     st.plotly_chart(fig, use_container_width=True)
 
-    # ---------------------------------------------------------
-    # DRIVER–CIRCUIT PERFORMANCE MATRIX
-    # ---------------------------------------------------------
+    # 2. Driver–Circuit Performance Matrix
     st.subheader("🌍 Driver–Circuit Performance Matrix")
 
-    if "circuit_name" in df.columns:
+    top_drivers = df.groupby("driver_name")["points"].sum().nlargest(15).index
+    top_circuits = df.groupby("circuit_name")["points"].sum().nlargest(15).index
+
+    filtered_matrix_df = df[df["driver_name"].isin(top_drivers) & df["circuit_name"].isin(top_circuits)]
+
+    if not filtered_matrix_df.empty:
         circuit_matrix = (
-            df.groupby(["driver_name", "circuit_name"], dropna=False)["points"]
+            filtered_matrix_df.groupby(["driver_name", "circuit_name"], dropna=False)["points"]
             .sum()
             .reset_index()
         )
@@ -68,18 +96,15 @@ def render_rq5(data):
             title="Driver–Circuit Points Heatmap",
             color_continuous_scale="Magma",
         )
+        fig2.update_layout(template="plotly_dark", xaxis_tickangle=-45)
         st.plotly_chart(fig2, use_container_width=True)
-    else:
-        st.warning("⚠ 'circuit_name' column not found in dataset.")
 
-    # ---------------------------------------------------------
-    # CONSTRUCTOR–CIRCUIT SYNERGY
-    # ---------------------------------------------------------
+    # 3. Constructor–Circuit Synergy
     st.subheader("🏗️ Constructor–Circuit Synergy")
 
-    if "constructor_name" in df.columns and "circuit_name" in df.columns:
+    if not filtered_matrix_df.empty:
         constructor_circuit = (
-            df.groupby(["constructor_name", "circuit_name"], dropna=False)["points"]
+            filtered_matrix_df.groupby(["constructor_name", "circuit_name"], dropna=False)["points"]
             .sum()
             .reset_index()
         )
@@ -93,16 +118,16 @@ def render_rq5(data):
             title="Constructor–Circuit Synergy (Points)",
             color_continuous_scale="Viridis",
         )
+        fig3.update_layout(template="plotly_dark", xaxis_tickangle=-45)
         st.plotly_chart(fig3, use_container_width=True)
 
-    # ---------------------------------------------------------
-    # NATIONALITY‑BASED PERFORMANCE
-    # ---------------------------------------------------------
+    # 4. Nationality Performance
     st.subheader("🌎 Nationality‑Based Performance")
 
-    if "driver_nationality" in df.columns:
+    nat_col = "driver_nationality" if "driver_nationality" in df.columns else ("nationality" if "nationality" in df.columns else None)
+    if nat_col:
         nationality_perf = (
-            df.groupby("driver_nationality", dropna=False)["points"]
+            df.groupby(nat_col, dropna=False)["points"]
             .sum()
             .reset_index()
             .sort_values("points", ascending=False)
@@ -110,34 +135,35 @@ def render_rq5(data):
 
         fig4 = px.bar(
             nationality_perf,
-            x="driver_nationality",
+            x=nat_col,
             y="points",
             title="Driver Nationality — Total Points",
             color="points",
             color_continuous_scale="Inferno",
         )
+        fig4.update_layout(template="plotly_dark", xaxis_tickangle=-45)
         st.plotly_chart(fig4, use_container_width=True)
 
-    # ---------------------------------------------------------
-    # SEASON‑WISE PERFORMANCE TREND
-    # ---------------------------------------------------------
+    # 5. Season Trend
     st.subheader("📈 Season‑Wise Performance Trend")
 
-    season_trend = (
-        df.groupby("season", dropna=False)["points"]
-        .sum()
-        .reset_index()
-        .sort_values("season")
-    )
+    if "season" in df.columns:
+        season_trend = (
+            df.groupby("season", dropna=False)["points"]
+            .sum()
+            .reset_index()
+            .sort_values("season")
+        )
 
-    fig5 = px.line(
-        season_trend,
-        x="season",
-        y="points",
-        title="Total Points Awarded per Season",
-        markers=True,
-        color_discrete_sequence=["#ff1e00"],
-    )
-    st.plotly_chart(fig5, use_container_width=True)
+        fig5 = px.line(
+            season_trend,
+            x="season",
+            y="points",
+            title="Total Points Awarded per Season",
+            markers=True,
+            color_discrete_sequence=["#ff1e00"],
+        )
+        fig5.update_layout(template="plotly_dark")
+        st.plotly_chart(fig5, use_container_width=True)
 
     st.success("RQ5 analysis loaded successfully.")

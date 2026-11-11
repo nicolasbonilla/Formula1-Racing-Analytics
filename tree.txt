@@ -1,4 +1,4 @@
-F1-Analytics
+Formula1-Racing-Analytics
 ├── dashboard
 │   ├── __pycache__
 │   │   ├── theme.cpython-313.pyc
@@ -11,13 +11,15 @@ F1-Analytics
 │   │   │   ├── rq2_race_outcomes.cpython-313.pyc
 │   │   │   ├── rq3_circuit_geography.cpython-313.pyc
 │   │   │   ├── rq4_sprint_race.cpython-313.pyc
-│   │   │   └── rq5_cross_dataset.cpython-313.pyc
+│   │   │   ├── rq5_cross_dataset.cpython-313.pyc
+│   │   │   └── rq6_graphic_llm_rag.cpython-313.pyc
 │   │   ├── executive_summary.py
 │   │   ├── rq1_driver_constructor.py
 │   │   ├── rq2_race_outcomes.py
 │   │   ├── rq3_circuit_geography.py
 │   │   ├── rq4_sprint_race.py
-│   │   └── rq5_cross_dataset.py
+│   │   ├── rq5_cross_dataset.py
+│   │   └── rq6_graphic_llm_rag.py
 │   ├── theme.py
 │   └── utils.py
 ├── data
@@ -25,7 +27,7 @@ F1-Analytics
 │   │   ├── circuits
 │   │   │   ├── circuits.parquet
 │   │   │   │   ├── _SUCCESS
-│   │   │   │   └── part-00000-9cbc4baf-f2e0-4296-860e-d32622796bed-c000.snappy.parquet
+│   │   │   │   └── part-00000-340da1f2-3012-454b-a18c-384395d61297-c000.snappy.parquet
 │   │   │   └── data.parquet
 │   │   │       ├── _SUCCESS
 │   │   │       └── batch_id=20260610_153002
@@ -33,7 +35,7 @@ F1-Analytics
 │   │   ├── constructors
 │   │   │   ├── constructors.parquet
 │   │   │   │   ├── _SUCCESS
-│   │   │   │   └── part-00000-dba6c57e-ce9e-4b04-9fe8-20fcb4d875a5-c000.snappy.parquet
+│   │   │   │   └── part-00000-36110fc6-4511-4a2d-9358-b1f73d1b18ce-c000.snappy.parquet
 │   │   │   └── data.parquet
 │   │   │       ├── _SUCCESS
 │   │   │       └── batch_id=20260610_153023
@@ -45,7 +47,7 @@ F1-Analytics
 │   │   │   │       └── part-00000-5178d9b3-2a4c-4cee-afd6-0d1ce74d895c.c000.snappy.parquet
 │   │   │   └── drivers.parquet
 │   │   │       ├── _SUCCESS
-│   │   │       └── part-00000-ad4c42b8-67ec-4ce7-8528-5771c6ebc91e-c000.snappy.parquet
+│   │   │       └── part-00000-33e2998a-d20a-4fd1-8137-d59a061fd1a4-c000.snappy.parquet
 │   │   ├── landing
 │   │   │   ├── circuits.csv
 │   │   │   ├── constructors.json
@@ -149,7 +151,7 @@ F1-Analytics
 │   │   │   │       └── part-00000-028e9a60-335d-4e2f-8f47-9a76301f50ba.c000.snappy.parquet
 │   │   │   └── races.parquet
 │   │   │       ├── _SUCCESS
-│   │   │       └── part-00000-db589e57-61c6-4f7d-8011-0ef9a597350c-c000.snappy.parquet
+│   │   │       └── part-00000-60ac7c12-338a-4793-bc2b-8379323071b3-c000.snappy.parquet
 │   │   ├── results
 │   │   │   ├── data.parquet
 │   │   │   │   ├── _SUCCESS
@@ -166,7 +168,7 @@ F1-Analytics
 │   │   │   │       └── part-00009-41e63cb9-79af-4ddc-9b52-a13992ae8b31.c000.snappy.parquet
 │   │   │   └── results.parquet
 │   │   │       ├── _SUCCESS
-│   │   │       └── part-00000-6a1c8de9-d1d6-4ea0-a2a1-5f41e05c5941-c000.snappy.parquet
+│   │   │       └── part-00000-423f87f0-dec2-405a-ae94-4da120be0943-c000.snappy.parquet
 │   │   └── sprints
 │   │       ├── data.parquet
 │   │       │   ├── _SUCCESS
@@ -177,7 +179,7 @@ F1-Analytics
 │   │       │       └── part-00003-62616734-2153-491b-9522-48c02b06cdc7.c000.snappy.parquet
 │   │       └── sprints.parquet
 │   │           ├── _SUCCESS
-│   │           └── part-00000-27fdcb26-747d-45cf-a831-75c0d47b4bff-c000.snappy.parquet
+│   │           └── part-00000-66f735f7-b934-43ae-8976-893e38d7dd21-c000.snappy.parquet
 │   ├── control
 │   │   ├── batch_control
 │   │   │   ├── 2025-01.completed
@@ -712,7 +714,7 @@ F1-Analytics
 │       │   │   └── part-00000-bd94b0e1-91a3-4578-a741-c00a8db63df6-c000.snappy.parquet
 │       │   ├── circuits.parquet
 │       │   │   ├── _SUCCESS
-│       │   │   └── part-00000-ff103fd7-a83b-4b5e-808b-34359896cb01-c000.snappy.parquet
+│       │   │   └── part-00000-1abe7a9c-f2fa-4468-9b54-1aab5a62b269-c000.snappy.parquet
 │       │   └── data.parquet
 │       │       ├── _SUCCESS
 │       │       └── part-00000-3990458b-dec7-430a-861c-e7fb8595314e-c000.snappy.parquet
@@ -722,7 +724,7 @@ F1-Analytics
 │       │   │   └── part-00000-e4b69b84-0ffe-45ff-89ae-8b3bb63a81b2-c000.snappy.parquet
 │       │   ├── constructors.parquet
 │       │   │   ├── _SUCCESS
-│       │   │   └── part-00000-033bda2b-98ab-46e0-9fc2-022f4f535ec7-c000.snappy.parquet
+│       │   │   └── part-00000-61413937-2dd1-46ec-940f-6ef997933600-c000.snappy.parquet
 │       │   └── data.parquet
 │       │       ├── _SUCCESS
 │       │       └── part-00000-1d05b23d-176c-4602-8438-23ef5f739130-c000.snappy.parquet
@@ -735,7 +737,7 @@ F1-Analytics
 │       │   │   └── part-00000-f9bec31c-ee69-4190-ab84-c9cd04e21b06-c000.snappy.parquet
 │       │   └── drivers.parquet
 │       │       ├── _SUCCESS
-│       │       └── part-00000-742a7754-c974-4a0e-b6df-933cf973ca24-c000.snappy.parquet
+│       │       └── part-00000-0a5b0298-cab7-4d6b-bbc2-c29ea10ca5f9-c000.snappy.parquet
 │       ├── races
 │       │   ├── data.parquet
 │       │   │   ├── _SUCCESS
@@ -745,7 +747,7 @@ F1-Analytics
 │       │   │   └── part-00000-51a6c475-af1b-49fb-a3e0-d3b478efbbc2-c000.snappy.parquet
 │       │   └── races.parquet
 │       │       ├── _SUCCESS
-│       │       └── part-00000-7e36cbb7-6efb-47ec-a0b8-4a9c715afdf9-c000.snappy.parquet
+│       │       └── part-00000-5de95b3e-b346-4a1d-a153-c2f2605386bb-c000.snappy.parquet
 │       ├── results
 │       │   ├── results_silver.parquet
 │       │   │   ├── _SUCCESS
@@ -754,7 +756,7 @@ F1-Analytics
 │       │   │   └── part-00002-89a090e4-bc45-45e0-9492-27d624dc5102-c000.snappy.parquet
 │       │   └── results.parquet
 │       │       ├── _SUCCESS
-│       │       └── part-00000-a7988148-93d5-493a-8570-4c5bbf0473a8-c000.snappy.parquet
+│       │       └── part-00000-844526af-bbeb-4bd4-9e8e-1f9b544ba435-c000.snappy.parquet
 │       └── sprints
 │           ├── data.parquet
 │           │   ├── _SUCCESS
@@ -764,7 +766,67 @@ F1-Analytics
 │           │   └── part-00000-d12c9b95-1d58-4bd1-a881-d8c0bd9d8bf1-c000.snappy.parquet
 │           └── sprints.parquet
 │               ├── _SUCCESS
-│               └── part-00000-67c52feb-4054-4d74-b09d-3b5adabfd006-c000.snappy.parquet
+│               └── part-00000-6547720d-aa2b-4971-ba39-4c35eb02b042-c000.snappy.parquet
+├── driver.png
+├── f1_graph.gexf
+├── f1_graph.graphml
+├── f1_knowledge_graph.png
+├── F1-LLM-RAG-plan.pages
+├── Graphic-LlmRag
+│   ├── api
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-311.pyc
+│   │   │   └── app.cpython-311.pyc
+│   │   └── app.py
+│   ├── graph_store
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-311.pyc
+│   │   │   └── neo4j_connector.cpython-311.pyc
+│   │   ├── neo4j_connector.py
+│   │   └── visualize_graph.py
+│   ├── GraphicLLMTree.txt
+│   ├── LLM_Stremlit
+│   │   └── app.py
+│   ├── ml_engine
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-311.pyc
+│   │   │   ├── autolabel.cpython-311.pyc
+│   │   │   ├── evaluator.cpython-311.pyc
+│   │   │   └── trainer.cpython-311.pyc
+│   │   ├── autolabel.py
+│   │   ├── evaluator.py
+│   │   ├── registry
+│   │   │   ├── best_model.pkl
+│   │   │   ├── isolation_forest.pkl
+│   │   │   ├── lightgbm.pkl
+│   │   │   ├── model_leaderboard.json
+│   │   │   ├── model_metadata.json
+│   │   │   └── xgboost.pkl
+│   │   └── trainer.py
+│   ├── rag_engine
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-311.pyc
+│   │   │   ├── embedder.cpython-311.pyc
+│   │   │   ├── retriever.cpython-311.pyc
+│   │   │   └── vector_store.cpython-311.pyc
+│   │   ├── embedder.py
+│   │   ├── retriever.py
+│   │   └── vector_store.py
+│   ├── README.md
+│   ├── requirements.txt
+│   └── scripts
+│       └── run_pipeline.sh
+├── MetaData-FAIR
+│   ├── DataCite.xml
+│   ├── dublin.xml
+│   ├── F-UJI - Automated FAIR Data Assessment Tool.pdf
+│   ├── F-UJI - FAIR+Meta.pdf
+│   ├── https___doi.org_10.5281_zenodo.23416916.json
+│   └── schemaOrg.xml
 ├── notebooks
 │   ├── 00-common
 │   │   ├── __pycache__
@@ -814,14 +876,42 @@ F1-Analytics
 │   │   ├── 01_identify_next_batch.py
 │   │   ├── 02_create_new_batch.py
 │   │   └── 03_complete_batch.py
-│   └── DataQualityProfile.ipynb
+│   ├── data_quality_missing_values.png
+│   ├── DataQualityProfile.ipynb
+│   ├── f1_driver_constructor_network.gexf
+│   ├── f1_network_graph.png
+│   ├── f1_quality_distributions.png
+│   └── gold_results_preview.csv
+├── QVisualizations
+│   ├── Circuit_Geography
+│   │   ├── CircuitCompetitivenessIndex.png
+│   │   └── HostCountryPoints.png
+│   ├── Cross‑Dataset_Insights
+│   │   ├── Driver_NationalityPoint.png
+│   │   ├── SeasonPerformanceIndex.png
+│   │   └── WeightPerformanceIndex.png
+│   ├── Driver_Constructor_Insights
+│   │   ├── Driveer_ConstructorMatrix.png
+│   │   ├── Driver_AveragePoints.png
+│   │   ├── Driver_TotalPoints.png
+│   │   └── Top_Constructors.png
+│   ├── Race Outcomes & Competitiveness
+│   │   ├── Constructor_ReliabilityIndex.png
+│   │   ├── DNFRatebySeason.png
+│   │   ├── Driver_DNF_Heatmap.png
+│   │   └── GridVsFinalPosition.png
+│   └── Sprint Race Analysis
+│       ├── ConstructorSprintPoint.png
+│       ├── Sprint_GridVsFinalPosition.png
+│       ├── Sprint_PointDistribution.png
+│       └── SprintVsRacePoint.png
 ├── racing_f1_data.zip
 ├── README.md
 ├── scripts
 │   ├── install_workspace.sh
 │   ├── logs
-│   │   ├── dashboard_20261016_194435.log
-│   │   ├── orchestration_20261016_194307.log
+│   │   ├── dashboard_20261109_153540.log
+│   │   ├── orchestration_20261109_153409.log
 │   │   ├── pipeline
 │   │   │   └── 2026-02
 │   │   │       ├── bronze_01.log
@@ -841,11 +931,11 @@ F1-Analytics
 │   │   │       ├── silver_04.log
 │   │   │       ├── silver_05.log
 │   │   │       └── silver_06.log
-│   │   └── pipeline_2026-02_20261016_194311.log
+│   │   └── pipeline_2026-02_20261109_153412.log
 │   ├── main.sh
 │   ├── run_dashboard.sh
 │   ├── run_orchestration.sh
 │   └── run_pipeline.sh
 └── tree.txt
 
-224 directories, 625 files
+243 directories, 696 files

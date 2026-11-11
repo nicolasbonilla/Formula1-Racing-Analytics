@@ -6,30 +6,47 @@ def render_rq4(df):
     st.title("⚡ RQ4 — Sprint Race Analysis")
 
     # ---------------------------------------------------------
-    # FILTER ONLY SPRINT SESSIONS FROM GOLD
+    # VALIDATION & FILTER SPRINT SESSIONS
     # ---------------------------------------------------------
-    sprint_df = df[df["session_type"] == "SPRINT"].copy()
+    if df.empty:
+        st.warning("⚠️ No records match your current filter settings. Please broaden your slider or season selections.")
+        return
+
+    if "session_type" in df.columns:
+        sprint_df = df[df["session_type"] == "SPRINT"].copy()
+    else:
+        sprint_df = df.copy() # Fallback if session_type is implicit
 
     if sprint_df.empty:
-        st.warning("⚠ No sprint data available in this batch.")
+        st.warning("⚠️ No sprint data available in this filtered batch.")
         return
+
+    if "driver_name" not in sprint_df.columns:
+        sprint_df["driver_name"] = "Driver " + sprint_df.get("driver_id", pd.Series([1]*len(sprint_df))).astype(str)
+
+    if "constructor_name" not in sprint_df.columns:
+        sprint_df["constructor_name"] = "Constructor " + sprint_df.get("constructor_id", pd.Series([1]*len(sprint_df))).astype(str)
 
     # ---------------------------------------------------------
     # 1) GRID vs FINAL POSITION — Sprint Edition
     # ---------------------------------------------------------
     st.subheader("📉 Sprint: Grid Position vs Final Position")
 
+    grid_col = "grid_position" if "grid_position" in sprint_df.columns else "grid"
+    final_col = "final_position" if "final_position" in sprint_df.columns else "position"
+
     fig = px.scatter(
         sprint_df,
-        x="grid_position",
-        y="final_position",
-        color="points",
+        x=grid_col,
+        y=final_col,
+        color="points" if "points" in sprint_df.columns else None,
         hover_name="driver_name",
         title="Sprint — Grid vs Final Position",
         color_continuous_scale="Turbo",
         trendline="ols",
     )
     fig.update_yaxes(autorange="reversed")  # P1 at top
+    fig.update_layout(template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -52,6 +69,7 @@ def render_rq4(df):
         color="points",
         color_continuous_scale="Reds",
     )
+    fig2.update_layout(template="plotly_dark", xaxis_tickangle=-45)
     st.plotly_chart(fig2, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -59,9 +77,9 @@ def render_rq4(df):
     # ---------------------------------------------------------
     st.subheader("🔗 Sprint vs Race Performance Comparison")
 
+    race_sessions = df[df["session_type"] == "RACE"] if "session_type" in df.columns else df
     race_df = (
-        df[df["session_type"] == "RACE"]
-        .groupby("driver_name", dropna=False)["points"]
+        race_sessions.groupby("driver_name", dropna=False)["points"]
         .sum()
         .reset_index()
         .rename(columns={"points": "race_points"})
@@ -81,8 +99,9 @@ def render_rq4(df):
         title="Sprint Points vs Race Points",
         color="race_points",
         color_continuous_scale="Viridis",
-        size="race_points"
+        size="race_points" if "race_points" in sprint_vs_race.columns and sprint_vs_race["race_points"].sum() > 0 else None
     )
+    fig3.update_layout(template="plotly_dark")
     st.plotly_chart(fig3, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -105,6 +124,7 @@ def render_rq4(df):
         color="points",
         color_continuous_scale="Blues",
     )
+    fig4.update_layout(template="plotly_dark", xaxis_tickangle=-45)
     st.plotly_chart(fig4, use_container_width=True)
 
     # ---------------------------------------------------------
@@ -112,23 +132,25 @@ def render_rq4(df):
     # ---------------------------------------------------------
     st.subheader("💥 Sprint DNF Analysis")
 
-    sprint_df["is_dnf"] = sprint_df["status"].str.contains("DNF", case=False, na=False)
+    if "status" in sprint_df.columns:
+        sprint_df["is_dnf"] = sprint_df["status"].str.contains("DNF|Retired|Accident", case=False, na=False)
 
-    sprint_dnf = (
-        sprint_df.groupby("driver_name", dropna=False)["is_dnf"]
-        .sum()
-        .reset_index()
-        .sort_values("is_dnf", ascending=False)
-    )
+        sprint_dnf = (
+            sprint_df.groupby("driver_name", dropna=False)["is_dnf"]
+            .sum()
+            .reset_index()
+            .sort_values("is_dnf", ascending=False)
+        )
 
-    fig5 = px.bar(
-        sprint_dnf,
-        x="driver_name",
-        y="is_dnf",
-        title="Sprint DNFs by Driver",
-        color="is_dnf",
-        color_continuous_scale="Inferno",
-    )
-    st.plotly_chart(fig5, use_container_width=True)
+        fig5 = px.bar(
+            sprint_dnf,
+            x="driver_name",
+            y="is_dnf",
+            title="Sprint DNFs by Driver",
+            color="is_dnf",
+            color_continuous_scale="Inferno",
+        )
+        fig5.update_layout(template="plotly_dark", xaxis_tickangle=-45)
+        st.plotly_chart(fig5, use_container_width=True)
 
     st.success("RQ4 analysis loaded successfully.")
